@@ -1,15 +1,15 @@
 from flask import Flask,jsonify
 import sys
-import sqlalchemy as sa
 import csv
-import pandas as pd
 import sqlite3
 import json
+import math
 
 # engine = sa.create_engine('sqlite:///database.db')
 # Base.metadata.create_all(engine)
 
 dept = {
+  0 : 'All Orders',
   1 : 'Frozen',
   2 : 'Health',
   3 : 'Grains',
@@ -33,27 +33,66 @@ dept = {
   21: 'Misc'
 }
 
-# dept['1']  = 'Frozen'
-# dept['2']  = 'Health'
-# dept['3']  = 'Grains'
-# dept['4']  = 'Fruits & Veggies'
-# dept['5']  = 'Alcohol'
-# dept['6']  = 'Foriegn' #asian and mexican
-# dept['7']  = 'Beverages'
-# dept['8']  = 'Pet Food'
-# dept['9']  = 'Pasta & Rice' #sauces, pasta, rice
-# dept['10'] = 'Fruits & Veggies'
-# dept['11'] = 'Toiletries'
-# dept['12'] = 'Meats'
-# dept['13'] = 'Condiments' #biscuits
-# dept['14'] = 'Breakfast' #granola and such
-# dept['15'] = 'Canned Foods'
-# dept['16'] = 'Dairy'
-# dept['17'] = 'Cleaning Supplies'
-# dept['18'] = 'Baby Food'
-# dept['19'] = 'Snacks' #chips, crackers, craisins, etc
-# dept['20'] = 'Deli' #deli stuff, salads, meat
-# dept['21'] = 'Misc'
+app = Flask(__name__)
+# app.config['SQLAlchemy_DATABASE_URI'] = 'sqlite:./db/database.db'
+# db = sa(app)
+
+@app.route("/")
+def main():
+  conn = sqlite3.connect('./db/database.db')
+  c = conn.cursor()
+  d = {
+    'Requests' : {
+      '/totals' : 'List of transaction and revenue totals for each department',
+      '/city/:city/' : 'List of transaction revenue totals for a specific city'
+    }
+  }
+  create_db()
+  return jsonify(d)
+
+@app.route("/totals")
+def totals():
+  conn = sqlite3.connect('./db/database.db')
+  c = conn.cursor()
+  d = dict()
+  orders = c.execute("SELECT COUNT(DISTINCT order_number) FROM catalog")
+  d[dept[0]] = {}
+  d[dept[0]]['Transactions']= json.dumps(c.fetchall()[0][0])
+  orders = c.execute("SELECT SUM(price) FROM catalog")
+  d[dept[0]]['Revenue'] = '$' + str(round(float(json.dumps(c.fetchall()[0][0])),2))
+  for x in range(1,21):
+    d[dept[x]] = {}
+    print("SELECT COUNT(DISTINCT order_number) FROM catalog WHERE department_id = "+str(x))
+    orders = c.execute("SELECT COUNT(DISTINCT order_number) FROM catalog WHERE department_id = "+str(x))
+    d[dept[x]]['Transactions'] = json.dumps(c.fetchall()[0][0])
+    orders = c.execute("SELECT SUM(price) FROM catalog WHERE department_id = "+str(x))
+    d[dept[x]]['Revenue'] = '$' + str(round(float(json.dumps(c.fetchall()[0][0])),2))
+  return jsonify(d)
+
+
+@app.route("/city/<string:city_name>/")
+def city(city_name):
+  print("Getting data for "+ city_name)
+  conn = sqlite3.connect('./db/database.db')
+  c = conn.cursor()
+  d = dict()
+  print("SELECT COUNT(DISTINCT order_number) FROM catalog WHERE city = "+city_name)
+  orders = c.execute("SELECT COUNT(DISTINCT order_number) FROM catalog WHERE city = '"+city_name+"'")
+  d[dept[0]] = {}
+  d[dept[0]]['Transactions']= json.dumps(c.fetchall()[0][0])
+  orders = c.execute("SELECT SUM(price) FROM catalog WHERE city = '"+city_name+"'")
+  d[dept[0]]['Revenue'] = '$' + str(round(float(json.dumps(c.fetchall()[0][0])),2))
+  for x in range(1,21):
+    d[dept[x]] = {}
+    orders = c.execute("SELECT COUNT(DISTINCT order_number) FROM catalog WHERE department_id = "+str(x)+" and city = '"+city_name+"'")
+    d[dept[x]]['Transactions'] = json.dumps(c.fetchall()[0][0])
+    orders = c.execute("SELECT SUM(price) FROM catalog WHERE department_id = "+str(x)+" and city = '"+city_name+"'")
+    d[dept[x]]['Revenue'] = '$' + str(round(float(json.dumps(c.fetchall()[0][0])),2))
+  return jsonify(d)
+
+if __name__ == "__main__":
+  app.run()
+
 
 def create_db():
   conn = sqlite3.connect('./db/database.db')
@@ -66,57 +105,19 @@ def create_db():
                 customer_id int,
                 product_name text,
                 department_id int,
-                price real)''')
-
+                price real,
+                city text)''')
   file_name = '../10000_transactions.csv'
   f = open(file_name,'rt')
   reader = csv.reader(f)
   column_names = True
   for row in reader:
-    # print(row)
-    # print(c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='catalog'"))
     if column_names:
       column_names = False
+      print(row)
     else:
-      # print("INSERT INTO catalog VALUES ("+row[0]+","+row[1]+","+row[2]+",'"+row[3]+"',"+row[4]+","+row[5]+")")
-
-      c.execute("INSERT INTO catalog VALUES (?,?,?,?,?,?)", row)
+      c.execute("INSERT INTO catalog VALUES (?,?,?,?,?,?,?)", row)
   conn.commit()
   f.close()
 
-create_db()
 
-app = Flask(__name__)
-# app.config['SQLAlchemy_DATABASE_URI'] = 'sqlite:./db/database.db'
-# db = sa(app)
-
-@app.route("/")
-def main():
-  conn = sqlite3.connect('./db/database.db')
-  c = conn.cursor()
-  d = {
-    'Requests' : {
-      '/totals' : 'List of order/transaction totals for each department',
-      '/city/:city/' : 'List of order/transaction totals for a specific city'
-    }
-  }
-
-  return jsonify(d)
-
-@app.route("/totals")
-def default():
-  conn = sqlite3.connect('./db/database.db')
-  c = conn.cursor()
-  d = dict()
-  for x in range(1,21):
-    orders = c.execute("SELECT COUNT(DISTINCT order_number) FROM catalog WHERE department_id = "+str(x))
-    d[dept[x]]= json.dumps(c.fetchall()[0][0])#orders
-  return jsonify(d)
-
-
-@app.route("/city/<string:city>/")
-def city(city):
-  return city
-
-if __name__ == "__main__":
-  app.run()
