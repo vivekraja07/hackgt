@@ -96,6 +96,25 @@ def city(city_name):
       d[dept[x]]['Revenue'] = '$' + str(round(float(value),2))
   return jsonify(d)
 
+@app.route("/store/<string:city_name>/<int:num_customers>/")
+def store(city_name, num_customers):
+  print("Getting data for store in " + city_name)
+  conn = sqlite3.connect('./db/database.db')
+  c = conn.cursor()
+  d = dict()
+  c.execute("SELECT DISTINCT order_number FROM catalog WHERE city = '" + city_name + "' limit '"+str(num_customers)+"'")
+  orderNumbers = c.fetchall()
+  i = 0
+  for orderNumber in orderNumbers:
+     d[i] = []
+     orderNum = orderNumber[0]
+     c.execute("select department_id from catalog where city = '" + city_name + "' and order_number = '" + str(orderNum) + "'")
+     departments = c.fetchall()
+     for department in departments:
+       d[i].append(department[0])
+     i += 1
+  return jsonify(d)
+
 if __name__ == "__main__":
   app.run()
 
