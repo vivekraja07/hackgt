@@ -15,7 +15,7 @@ dept = {
   3 : 'Grains',
   4 : 'Fruits & Veggies',
   5 : 'Alcohol',
-  6 : 'Foriegn',            #asian and mexican
+  6 : 'Foreign',            #asian and mexican
   7 : 'Beverages',
   8 : 'Pet Food',
   9 : 'Pasta & Rice',       #sauces, pasta, rice
@@ -38,7 +38,7 @@ dept = {
 # dept['3']  = 'Grains'
 # dept['4']  = 'Fruits & Veggies'
 # dept['5']  = 'Alcohol'
-# dept['6']  = 'Foriegn' #asian and mexican
+# dept['6']  = 'Foreign' #asian and mexican
 # dept['7']  = 'Beverages'
 # dept['8']  = 'Pet Food'
 # dept['9']  = 'Pasta & Rice' #sauces, pasta, rice
