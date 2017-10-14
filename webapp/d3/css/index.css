@@ -1,0 +1,58 @@
+/* On mouse hover, lighten state color */
+path:hover {
+  fill-opacity: .7;
+}
+
+/* Style for Custom Tooltip */
+div.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 60px;
+  height: 28px;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: white;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+/* Legend Font Style */
+body {
+  font: 11px sans-serif;
+  background-color: #ccc;
+}
+
+svg#map {
+  max-height: 100%;
+  max-width: 55%
+}
+
+svg#pie {
+  max-height: 100%;
+  max-width: 45%
+}
+
+
+div {
+  height: 500px;
+}
+
+/* Legend Position Style */
+.legend {
+  position:absolute;
+  left:800px;
+  top:350px;
+}
+
+/*CSS for Pie Charts*/
+path.slice{
+  stroke-width:2px;
+}
+
+polyline{
+  opacity: .3;
+  stroke: black;
+  stroke-width: 2px;
+  fill: none;
+}

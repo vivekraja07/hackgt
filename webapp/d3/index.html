@@ -4,68 +4,8 @@
 <meta charset="utf-8">
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <!-- <script src="api.js"></script> -->
-<style type="text/css">
+<link rel="stylesheet" href="css/index.css">
 
-/* On mouse hover, lighten state color */
-path:hover {
-	fill-opacity: .7;
-}
-
-/* Style for Custom Tooltip */
-div.tooltip {
- 	position: absolute;
-	text-align: center;
-	width: 60px;
-	height: 28px;
-	padding: 2px;
-	font: 12px sans-serif;
-	background: white;
-	border: 0px;
-	border-radius: 8px;
-	pointer-events: none;
-}
-
-/* Legend Font Style */
-body {
-	font: 11px sans-serif;
-  background-color: #ccc;
-}
-
-svg#map {
-  max-height: 100%;
-  max-width: 60%
-}
-
-svg#pie {
-  max-height: 100%;
-  max-width: 40%
-}
-
-
-div {
-  height: 500px;
-}
-
-/* Legend Position Style */
-.legend {
-	position:absolute;
-	left:800px;
-	top:350px;
-}
-
-/*CSS for Pie Charts*/
-path.slice{
-  stroke-width:2px;
-}
-
-polyline{
-  opacity: .3;
-  stroke: black;
-  stroke-width: 2px;
-  fill: none;
-}
-
-</style>
 </head>
 <body>
 <!-- <div id='map'></div> -->
@@ -197,6 +137,7 @@ svg.selectAll("circle")
       div.text(d.city)
            .style("left", (d3.event.pageX) + "px")
            .style("top", (d3.event.pageY - 28) + "px");
+      change(randomData());
 	})
 
     // fade out tooltip on mouse out
@@ -235,14 +176,10 @@ var legend = d3.select("div").append("svg")
 	});
 
 });
-</script>
-<!-- <div id='pie'></div> -->
-<script type="text/javascript">
-
   var pie_svg = d3.select("body")
     .append("svg")
     .attr("id","pie")
-    .attr("width",700)
+    .attr("width",800)
     .attr("height",500)
     .append("g")
 
@@ -275,12 +212,15 @@ var legend = d3.select("div").append("svg")
 
   var key = function(d){ return d.data.label; };
 
-  var color = d3.scale.ordinal()
-    .domain(["Lorem ipsum", "dolor sit", "amet", "consectetur", "adipisicing", "elit", "sed", "do", "eiusmod", "tempor", "incididunt"])
+  var color_pie = d3.scale.ordinal()
+    .domain(["Frozen", "Health", "Grains", "Fruits & Veggies", "Alcohol", "Foreign",
+             "Beverages", "Pet Food", "Pasta & Rice", "Toiletries", "Meats", "Condiments",
+             "Breakfast", "Canned Foods", "Dairy", "Cleaning Supplies", "Baby Food",
+             "Snacks", "Deli", "Misc"])
     .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
 
   function randomData (){
-    var labels = color.domain();
+    var labels = color_pie.domain();
     return labels.map(function(label){
       return { label: label, value: Math.random() }
     });
@@ -302,7 +242,7 @@ var legend = d3.select("div").append("svg")
 
     slice.enter()
       .insert("path")
-      .style("fill", function(d) { return color(d.data.label); })
+      .style("fill", function(d) { return color_pie(d.data.label); })
       .attr("class", "slice");
 
     slice
