@@ -33,8 +33,6 @@ dept = {
   21: 'Misc'
 }
 
-create_db()
-
 app = Flask(__name__)
 
 @app.route("/")
