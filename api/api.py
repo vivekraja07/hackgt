@@ -4,6 +4,7 @@ import sqlalchemy as sa
 import csv
 import pandas as pd
 import sqlite3
+import json
 
 # engine = sa.create_engine('sqlite:///database.db')
 # Base.metadata.create_all(engine)
@@ -30,10 +31,12 @@ def create_db():
       #               price real)''')
 
     else:
-      print("INSERT INTO catalog VALUES ('"+'\', '.join(row)+")")
-      # c.execute("INSERT INTO catalog VALUES ("+', '.join(row)+")")
+      # print("INSERT INTO catalog VALUES ('"+'\', \''.join(row)+"\')")
+      print("INSERT INTO catalog VALUES ("+row[0]+","+row[1]+","+row[2]+",'"+row[3]+"',"+row[4]+","+row[5]+")")
+      # c.execute("INSERT INTO catalog VALUES ("+row[0]+","+row[1]+","+row[2]+",'"+row[3]+"',"+row[4]+","+row[5]+")")
+      c.execute("INSERT INTO catalog VALUES (?,?,?,?,?,?)", row)
 
-  # conn.commit()
+  conn.commit()
   f.close()
 
 create_db()
@@ -52,9 +55,11 @@ app = Flask(__name__)
 @app.route("/")
 def hello():
   print('Python version ' + sys.version)
-  print('Pandas version ' + pd.__version__)
-  print('SQLAlchemy version ' + sa.__version__)
-  return "This is our api"
+  conn = sqlite3.connect('./db/database.db')
+  c = conn.cursor()
+  orders = c.execute("SELECT * FROM catalog")
+  json_string = json.dumps(c.fetchall())
+  return "This is our api" +json_string
 
 @app.route("/city/<string:city>/")
 def city(city):
