@@ -12,7 +12,15 @@ import json
 def create_db():
   conn = sqlite3.connect('./db/database.db')
   c = conn.cursor()
-  # c.execute("DELETE FROM catalog")
+  c.execute("DROP TABLE catalog")
+  c.execute('''CREATE TABLE catalog
+               (order_number int,
+                product_id int,
+                customer_id int,
+                product_name text,
+                department_id int,
+                price real)''')
+
   file_name = '../10000_transactions.csv'
   f = open(file_name,'rt')
   reader = csv.reader(f)
@@ -22,18 +30,9 @@ def create_db():
     # print(c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='catalog'"))
     if column_names:
       column_names = False
-      # c.execute('''CREATE TABLE catalog
-      #              (order_number int,
-      #               product_id int,
-      #               customer_id int,
-      #               product_name text,
-      #               department_id int,
-      #               price real)''')
-
     else:
       # print("INSERT INTO catalog VALUES ("+row[0]+","+row[1]+","+row[2]+",'"+row[3]+"',"+row[4]+","+row[5]+")")
       c.execute("INSERT INTO catalog VALUES (?,?,?,?,?,?)", row)
-      conn.commit()
   conn.commit()
   f.close()
 
@@ -48,9 +47,16 @@ def hello():
   print('Python version ' + sys.version)
   conn = sqlite3.connect('./db/database.db')
   c = conn.cursor()
-  orders = c.execute("SELECT * FROM catalog")
-  json_string = json.dumps(c.fetchall())
-  return jsonify(json_string)
+  d = dict()
+  for x in range(1,21):
+    orders = c.execute("SELECT COUNT(DISTINCT order_number) FROM catalog WHERE department_id = "+str(x))
+    # print(c.fetchall()[0][0])
+    d["dept_"+str(x)]= json.dumps(c.fetchall()[0][0])#orders
+  print(d)
+  # orders = c.execute("SELECT COUNT(DISTINCT order_number) FROM catalog WHERE department_id = 1")
+  # json_string = json.dumps(c.fetchall())
+  # json_string = json.dumps(d)
+  return jsonify(d)
 
 @app.route("/city/<string:city>/")
 def city(city):
