@@ -36,7 +36,7 @@ function createCORSRequest(method, url) {
     return xhr;
 }
 
-function makeCORSRequest(url) {
+function makeCORSRequest(url,city) {
     var xhr = createCORSRequest('GET', url);
     if (!xhr) {
         alert('CORS not supported');
@@ -45,30 +45,32 @@ function makeCORSRequest(url) {
     xhr.onload = function() {
         var text = xhr.responseText;
         json = JSON.parse(text);
-        var total = json['All Orders']['Transactions'];
+        var total_trans = json['All Orders']['Transactions'];
+        var total_rev = json['All Orders']['Revenue'];
         var x = 0;
         var data = [
-            {label: 'Frozen',               value: json['Frozen']['Transactions']/total},
-            {label: 'Health',               value: json['Health']['Transactions']/total},
-            {label: 'Grains',               value: json['Grains']['Transactions']/total},
-            {label: 'Fruits & Veggies',     value: json['Fruits & Veggies']['Transactions']/total},
-            {label: 'Alcohol',              value: json['Alcohol']['Transactions']/total},
-            {label: 'Foreign',              value: json['Foreign']['Transactions']/total},
-            {label: 'Beverages',            value: json['Beverages']['Transactions']/total},
-            {label: 'Pet Food',             value: json['Pet Food']['Transactions']/total},
-            {label: 'Pasta & Rice',         value: json['Pasta & Rice']['Transactions']/total},
-            {label: 'Toiletries',           value: json['Toiletries']['Transactions']/total},
-            {label: 'Meats',                value: json['Meats']['Transactions']/total},
-            {label: 'Condiments',           value: json['Condiments']['Transactions']/total},
-            {label: 'Breakfast',            value: json['Breakfast']['Transactions']/total},
-            {label: 'Canned Foods',         value: json['Canned Foods']['Transactions']/total},
-            {label: 'Dairy',                value: json['Dairy']['Transactions']/total},
-            {label: 'Cleaning Supplies',    value: json['Cleaning Supplies']['Transactions']/total},
-            {label: 'Baby Food',            value: json['Baby Food']['Transactions']/total},
-            {label: 'Snacks',               value: json['Snacks']['Transactions']/total},
-            {label: 'Deli',                 value: json['Deli']['Transactions']/total}
+            {label: 'Frozen',               value: json['Frozen']['Transactions']/total_trans},
+            {label: 'Health',               value: json['Health']['Transactions']/total_trans},
+            {label: 'Grains',               value: json['Grains']['Transactions']/total_trans},
+            {label: 'Fruits & Veggies',     value: json['Fruits & Veggies']['Transactions']/total_trans},
+            {label: 'Alcohol',              value: json['Alcohol']['Transactions']/total_trans},
+            {label: 'Foreign',              value: json['Foreign']['Transactions']/total_trans},
+            {label: 'Beverages',            value: json['Beverages']['Transactions']/total_trans},
+            {label: 'Pet Food',             value: json['Pet Food']['Transactions']/total_trans},
+            {label: 'Pasta & Rice',         value: json['Pasta & Rice']['Transactions']/total_trans},
+            {label: 'Toiletries',           value: json['Toiletries']['Transactions']/total_trans},
+            {label: 'Meats',                value: json['Meats']['Transactions']/total_trans},
+            {label: 'Condiments',           value: json['Condiments']['Transactions']/total_trans},
+            {label: 'Breakfast',            value: json['Breakfast']['Transactions']/total_trans},
+            {label: 'Canned Foods',         value: json['Canned Foods']['Transactions']/total_trans},
+            {label: 'Dairy',                value: json['Dairy']['Transactions']/total_trans},
+            {label: 'Cleaning Supplies',    value: json['Cleaning Supplies']['Transactions']/total_trans},
+            {label: 'Baby Food',            value: json['Baby Food']['Transactions']/total_trans},
+            {label: 'Snacks',               value: json['Snacks']['Transactions']/total_trans},
+            {label: 'Deli',                 value: json['Deli']['Transactions']/total_trans}
         ];
-        change(data);
+        var info = [city,total_trans,total_rev];
+        change(data,info);
     };
     xhr.onerror = function() {
         alert('Error making the request.');
@@ -76,11 +78,11 @@ function makeCORSRequest(url) {
     xhr.send();
 }
 
-function getCity(city) {
-    makeCORSRequest("http://localhost:5000/city/" + city);
+function getCity(city,city_info) {
+    makeCORSRequest("http://localhost:5000/city/" + city,city_info);
 }
 
 function getTotal(city) {
-    makeCORSRequest("http://localhost:5000/totals");
+    makeCORSRequest("http://localhost:5000/totals","All Orders");
 }
 

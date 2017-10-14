@@ -41,15 +41,11 @@ CORS(app)
 def main():
   conn = sqlite3.connect('./db/database.db')
   c = conn.cursor()
-  d = {
-    'Requests' : {
-      '/totals' : 'List of transaction and revenue totals for each department',
-      '/city/:city/' : 'List of transaction revenue totals for a specific city',
-      'cities' : 'New York, Los Angeles, Chicago, Houston, Philadelphia, Phoenix,'+
-                 'San Antonio, San Diego, Dallas, San Jose'
-    }
-  }
   create_db()
+  # orders = c.execute("SELECT * from ((SELECT distinct customer_id,order_number,product_id,product_name,price,department_id from catalog where order_number in (select distinct customer_id from catalog GROUP BY order_number having count(order_number) > 1 Limit 2) as mid where order_number = mid.order_number and customer_id = mid.customer_id) as m join catalog as c on m.customer_id = c.customer_id) ")
+  # data = json.dumps(c.fetchall())
+  # print(data)
+  # return jsonify(data)
   return render_template("docs.html")
 
 @app.route("/totals")
@@ -57,14 +53,14 @@ def totals():
   conn = sqlite3.connect('./db/database.db')
   c = conn.cursor()
   d = dict()
-  orders = c.execute("SELECT COUNT(DISTINCT order_number) FROM catalog")
+  orders = c.execute("SELECT COUNT(order_number) FROM catalog")
   d[dept[0]] = {}
   d[dept[0]]['Transactions']= json.dumps(c.fetchall()[0][0])
   orders = c.execute("SELECT SUM(price) FROM catalog")
   d[dept[0]]['Revenue'] = '$' + str(round(float(json.dumps(c.fetchall()[0][0])),2))
   for x in range(1,21):
     d[dept[x]] = {}
-    print("SELECT COUNT(DISTINCT order_number) FROM catalog WHERE department_id = "+str(x))
+    # print("SELECT COUNT(DISTINCT order_number) FROM catalog WHERE department_id = "+str(x))
     orders = c.execute("SELECT COUNT(DISTINCT order_number) FROM catalog WHERE department_id = "+str(x))
     d[dept[x]]['Transactions'] = json.dumps(c.fetchall()[0][0])
     orders = c.execute("SELECT SUM(price) FROM catalog WHERE department_id = "+str(x))

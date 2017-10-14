@@ -29,6 +29,10 @@ svg#map {
   max-width: 55%
 }
 
+svg {
+  z-index: 1;
+}
+
 svg#pie {
   max-height: 100%;
   max-width: 45%

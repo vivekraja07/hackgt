@@ -114,7 +114,7 @@ d3.csv("stateslived.csv", function(data) {
     		return projection([d.lon, d.lat])[1];
     	})
     	.attr("r", function(d) {
-    		return Math.sqrt(d.transactions_new) * 5;
+    		return Math.sqrt(d.transactions) * 5;
     	})
     	.style("fill", "rgb(217,91,67)")
     	.style("opacity", 0.85)
@@ -128,10 +128,10 @@ d3.csv("stateslived.csv", function(data) {
           .style("left", (d3.event.pageX) + "px")
           .style("top", (d3.event.pageY) + "px");
         if (d.city != "New York City") {
-          getCity(d.city.split(' ').join(''));
+          getCity(d.city.split(' ').join(''),d.city);
         } else {
           var resp = getCity('NewYork');
-          getCity('NewYork');
+          getCity('NewYork','New York City');
         }
     	})
       // fade out tooltip on mouse out
@@ -152,12 +152,28 @@ d3.csv("stateslived.csv", function(data) {
     .attr("height",500)
     .append("g")
 
+
   pie_svg.append("g")
     .attr("class", "slices");
   pie_svg.append("g")
     .attr("class", "labels");
   pie_svg.append("g")
     .attr("class", "lines");
+  pie_svg.append("text")
+    .attr("class", "city_name")
+    .attr("text-anchor", "middle")
+    .attr("font-size", "36")
+    .attr("y", "-30");
+  pie_svg.append("text")
+    .attr("class", "total_trans")
+    .attr("text-anchor", "middle")
+    .attr("font-size", "16")
+    .attr("y", "10");
+  pie_svg.append("text")
+    .attr("class", "total_rev")
+    .attr("text-anchor", "middle")
+    .attr("font-size", "16")
+    .attr("y", "50");
 
   var width = 700,
       height = 500,
@@ -197,7 +213,7 @@ d3.csv("stateslived.csv", function(data) {
 
   getTotal();
 
-  function change(data) {
+  function change(data,info) {
     /* ------- PIE SLICES -------*/
     var slice = pie_svg.select(".slices").selectAll("path.slice")
       .data(pie(data), key);
@@ -221,6 +237,12 @@ d3.csv("stateslived.csv", function(data) {
     slice.exit()
       .remove();
 
+    var title = pie_svg.select(".city_name")
+      .text(info[0]);
+    var trans = pie_svg.select(".total_trans")
+      .text('Total Transactions: '+info[1])
+    var trans = pie_svg.select(".total_rev")
+      .text('Total Revenue: '+info[2])
     /* ------- TEXT LABELS -------*/
 
     var text = pie_svg.select(".labels").selectAll("text")
@@ -288,13 +310,13 @@ d3.csv("stateslived.csv", function(data) {
   };
 </script>
 <div id="slider3"></div>
-<!-- Timeline Stuff -->
+<!--
+<!-- Timeline Stuff
 <script type="text/javascript">
   d3.select('#slider3').call(d3.slider()
     .axis(true).min(8).max(18).step(1)
     .on("slide", function(evt, value) {
-      console.log(value);
-      displayNewData('csv/cities_'+value+'.csv');
+      // displayNewData('csv/cities_'+value+'.csv');
     })
   );
 
@@ -336,22 +358,23 @@ function displayNewData(csv) {
            .duration(500)
            .style("opacity", 0);
       })
-      .attr("r", function(d) {
+      .attr("r",function(d) {
         console.log('old: '+Math.sqrt(d.transactions_old) * 5);
         return Math.sqrt(d.transactions_old) * 5;
       })
       .transition().duration(1000)
       .attr("r", function(d) {
-          console.log('old: '+Math.sqrt(d.transactions_new) * 5);
-          Math.sqrt(d.transactions_new) * 5;
+          console.log('new: '+Math.sqrt(d.transactions_new) * 5);
+          return Math.sqrt(d.transactions_new) * 5;
       });
     circles.exit()
       .transition().duration(500)
         .attr("r", function(d) {
           return Math.sqrt(d.transactions_old) * 5;
         })
+        // .remove()
   });
 }
 
 </script>
-
+-->
