@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script src="http://d3js.org/d3.v3.min.js"></script>
-<!-- <script src="api.js"></script> -->
+<script src="api.js"></script>
 <link rel="stylesheet" href="css/index.css">
 
 </head>
@@ -137,7 +137,12 @@ svg.selectAll("circle")
       div.text(d.city)
            .style("left", (d3.event.pageX) + "px")
            .style("top", (d3.event.pageY - 28) + "px");
-      change(randomData());
+      if (d.city != "New York City") {
+        getCity(d.city.split(' ').join(''));
+      } else {
+        var resp = getCity('NewYork');
+        getCity('NewYork');
+      }
 	})
 
     // fade out tooltip on mouse out
@@ -219,23 +224,16 @@ var legend = d3.select("div").append("svg")
              "Snacks", "Deli", "Misc"])
     .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
 
-  function randomData (){
+  function randomData () {
     var labels = color_pie.domain();
     return labels.map(function(label){
       return { label: label, value: Math.random() }
     });
   }
 
-  change(randomData());
-
-  d3.select(".randomize")
-    .on("click", function(){
-      change(randomData());
-    });
-
+  getTotal();
 
   function change(data) {
-
     /* ------- PIE SLICES -------*/
     var slice = pie_svg.select(".slices").selectAll("path.slice")
       .data(pie(data), key);
