@@ -7,9 +7,10 @@ path:hover {
 div.tooltip {
   position: absolute;
   text-align: center;
-  width: 60px;
-  height: 28px;
-  padding: 2px;
+  vertical-align: middle;
+  width: 100px;
+  height: 15px;
+  padding: 10px;
   font: 12px sans-serif;
   background: white;
   border: 0px;
