@@ -1,4 +1,4 @@
-from flask import Flask,jsonify
+from flask import Flask,jsonify,render_template
 import sys
 import csv
 import sqlite3
@@ -42,13 +42,13 @@ def main():
   d = {
     'Requests' : {
       '/totals' : 'List of transaction and revenue totals for each department',
-      '/city/:city/' : 'List of transaction revenue totals for a specific city' :{
-        'cities' : 'New York, Los Angeles, Chicago, Houston, Philadelphia'
-      }
+      '/city/:city/' : 'List of transaction revenue totals for a specific city',
+      'cities' : 'New York, Los Angeles, Chicago, Houston, Philadelphia, Phoenix,'+
+                 'San Antonio, San Diego, Dallas, San Jose'
     }
   }
   create_db()
-  return jsonify(d)
+  return render_template("docs.html")
 
 @app.route("/totals")
 def totals():
@@ -70,8 +70,9 @@ def totals():
   return jsonify(d)
 
 
-@app.route("/city/<string:city_name>/")
+@app.route("/city/<string:city_name>")
 def city(city_name):
+  create_db()
   print("Getting data for "+ city_name)
   conn = sqlite3.connect('./db/database.db')
   c = conn.cursor()
@@ -81,13 +82,21 @@ def city(city_name):
   d[dept[0]] = {}
   d[dept[0]]['Transactions']= json.dumps(c.fetchall()[0][0])
   orders = c.execute("SELECT SUM(price) FROM catalog WHERE city = '"+city_name+"'")
-  d[dept[0]]['Revenue'] = '$' + str(round(float(json.dumps(c.fetchall()[0][0])),2))
+  value = json.dumps(c.fetchall()[0][0])
+  if value == "null":
+    d[dept[0]]['Revenue'] = '$0.00'
+  else:
+    d[dept[0]]['Revenue'] = '$' + str(round(float(value),2))
   for x in range(1,21):
     d[dept[x]] = {}
     orders = c.execute("SELECT COUNT(DISTINCT order_number) FROM catalog WHERE department_id = "+str(x)+" and city = '"+city_name+"'")
     d[dept[x]]['Transactions'] = json.dumps(c.fetchall()[0][0])
     orders = c.execute("SELECT SUM(price) FROM catalog WHERE department_id = "+str(x)+" and city = '"+city_name+"'")
-    d[dept[x]]['Revenue'] = '$' + str(round(float(json.dumps(c.fetchall()[0][0])),2))
+    value = json.dumps(c.fetchall()[0][0])
+    if value == "null":
+      d[dept[x]]['Revenue'] = '$0.00'
+    else:
+      d[dept[x]]['Revenue'] = '$' + str(round(float(value),2))
   return jsonify(d)
 
 if __name__ == "__main__":
@@ -118,5 +127,3 @@ def create_db():
       c.execute("INSERT INTO catalog VALUES (?,?,?,?,?,?,?)", row)
   conn.commit()
   f.close()
-
-
