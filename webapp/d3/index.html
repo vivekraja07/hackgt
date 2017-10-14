@@ -37,8 +37,8 @@ div {
 svg.pie {
   max-width: 100%;
   max-height: 100%;
-  width: 960px;
-  height: 500px;
+  width: 400px;
+  height: 400px;
 }
 
 /* Legend Position Style */
@@ -200,32 +200,32 @@ svg.selectAll("circle")
            .style("opacity", 0);
     });
 });
-
+/*
 // Modified Legend Code from Mike Bostock: http://bl.ocks.org/mbostock/3888852
 // var legendText = ["Cities Lived", "States Lived", "States Visited", "Nada"];
 
-// var legend = d3.select("div").append("svg")
-//       		.attr("class", "legend")
-//      			.attr("width", 140)
-//     			.attr("height", 200)
-//    				.selectAll("g")
-//    				.data(color.domain().slice().reverse())
-//    				.enter()
-//    				.append("g")
-//      			.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+var legend = d3.select("div").append("svg")
+      		.attr("class", "legend")
+     			.attr("width", 140)
+    			.attr("height", 200)
+   				.selectAll("g")
+   				.data(color.domain().slice().reverse())
+   				.enter()
+   				.append("g")
+     			.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
-//   	legend.append("rect")
-//    		  .attr("width", 18)
-//    		  .attr("height", 18)
-//    		  .style("fill", color);
+  	legend.append("rect")
+   		  .attr("width", 18)
+   		  .attr("height", 18)
+   		  .style("fill", color);
 
-//   	legend.append("text")
-//   		  .data(legendText)
-//       	  .attr("x", 24)
-//       	  .attr("y", 9)
-//       	  .attr("dy", ".35em")
-//       	  .text(function(d) { return d; });
-
+  	legend.append("text")
+  		  .data(legendText)
+      	  .attr("x", 24)
+      	  .attr("y", 9)
+      	  .attr("dy", ".35em")
+      	  .text(function(d) { return d; });
+*/
 	});
 
 });
@@ -235,8 +235,8 @@ svg.selectAll("circle")
 
   var pie_svg = d3.select("#pie")
     .append("svg")
-    .attr("width",960)
-    .attr("height",500)
+    .attr("width",400)
+    .attr("height",400)
     .append("g")
 
   pie_svg.append("g")
@@ -246,8 +246,8 @@ svg.selectAll("circle")
   pie_svg.append("g")
     .attr("class", "lines");
 
-  var width = 960,
-      height = 450,
+  var width = 400,
+      height = 400,
     radius = Math.min(width, height) / 2;
 
   var pie = d3.layout.pie()
