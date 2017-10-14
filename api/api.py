@@ -15,7 +15,7 @@ dept = {
   3 : 'Grains',
   4 : 'Fruits & Veggies',
   5 : 'Alcohol',
-  6 : 'Foriegn',            #asian and mexican
+  6 : 'Foreign',            #asian and mexican
   7 : 'Beverages',
   8 : 'Pet Food',
   9 : 'Pasta & Rice',       #sauces, pasta, rice
@@ -33,6 +33,62 @@ dept = {
   21: 'Misc'
 }
 
+<<<<<<< HEAD
+=======
+# dept['1']  = 'Frozen'
+# dept['2']  = 'Health'
+# dept['3']  = 'Grains'
+# dept['4']  = 'Fruits & Veggies'
+# dept['5']  = 'Alcohol'
+# dept['6']  = 'Foreign' #asian and mexican
+# dept['7']  = 'Beverages'
+# dept['8']  = 'Pet Food'
+# dept['9']  = 'Pasta & Rice' #sauces, pasta, rice
+# dept['10'] = 'Fruits & Veggies'
+# dept['11'] = 'Toiletries'
+# dept['12'] = 'Meats'
+# dept['13'] = 'Condiments' #biscuits
+# dept['14'] = 'Breakfast' #granola and such
+# dept['15'] = 'Canned Foods'
+# dept['16'] = 'Dairy'
+# dept['17'] = 'Cleaning Supplies'
+# dept['18'] = 'Baby Food'
+# dept['19'] = 'Snacks' #chips, crackers, craisins, etc
+# dept['20'] = 'Deli' #deli stuff, salads, meat
+# dept['21'] = 'Misc'
+
+def create_db():
+  conn = sqlite3.connect('./db/database.db')
+  conn.text_factory = lambda x: unicode(x, "utf-8", "ignore")
+  c = conn.cursor()
+  c.execute("DROP TABLE catalog")
+  c.execute('''CREATE TABLE catalog
+               (order_number int,
+                product_id int,
+                customer_id int,
+                product_name text,
+                department_id int,
+                price real)''')
+
+  file_name = '../10000_transactions.csv'
+  f = open(file_name,'rt')
+  reader = csv.reader(f)
+  column_names = True
+  for row in reader:
+    # print(row)
+    # print(c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='catalog'"))
+    if column_names:
+      column_names = False
+    else:
+      # print("INSERT INTO catalog VALUES ("+row[0]+","+row[1]+","+row[2]+",'"+row[3]+"',"+row[4]+","+row[5]+")")
+
+      c.execute("INSERT INTO catalog VALUES (?,?,?,?,?,?)", row)
+  conn.commit()
+  f.close()
+
+create_db()
+
+>>>>>>> 2d75e5c2b597c34f2fa180a4f94b0b302e1d4790
 app = Flask(__name__)
 # app.config['SQLAlchemy_DATABASE_URI'] = 'sqlite:./db/database.db'
 # db = sa(app)
