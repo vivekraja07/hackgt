@@ -40,7 +40,7 @@ var path = d3.geo.path()               // path generator that will convert GeoJS
 
 // Define linear scale for output
 var color = d3.scale.linear()
-			  .range(["rgb(213,222,217)","rgb(69,173,168)","rgb(84,36,55)","rgb(217,91,67)"]);
+			  .range(["rgb(213,222,217)","rgb(69,173,168)","#22593b","rgb(217,91,67)"]);
 
 //Create SVG element and append map to the SVG
 var svg = d3.select("body")
@@ -93,7 +93,7 @@ svg.selectAll("path")
 	.append("path")
 	.attr("d", path)
 	.style("stroke", "#fff")
-	.style("stroke-width", "1")
+	.style("stroke-width", "2")
 	.style("fill", function(d) {
 
 	// Get data value
@@ -136,7 +136,7 @@ svg.selectAll("circle")
            .style("opacity", .9);
       div.text(d.city)
            .style("left", (d3.event.pageX) + "px")
-           .style("top", (d3.event.pageY - 28) + "px");
+           .style("top", (d3.event.pageY) + "px");
       change(randomData());
 	})
 
@@ -201,12 +201,12 @@ var legend = d3.select("div").append("svg")
     });
 
   var arc = d3.svg.arc()
-    .outerRadius(radius * 0.8)
-    .innerRadius(radius * 0.4);
+    .outerRadius(radius * 0.7)
+    .innerRadius(radius * 0.5);
 
   var outerArc = d3.svg.arc()
     .innerRadius(radius * 0.9)
-    .outerRadius(radius * 0.9);
+    .outerRadius(radius * 0.8);
 
   pie_svg.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
@@ -217,7 +217,7 @@ var legend = d3.select("div").append("svg")
              "Beverages", "Pet Food", "Pasta & Rice", "Toiletries", "Meats", "Condiments",
              "Breakfast", "Canned Foods", "Dairy", "Cleaning Supplies", "Baby Food",
              "Snacks", "Deli", "Misc"])
-    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+    .range(["#7DDF64", "#0dc453", "#719977",  "#22593b", "#0dc453", "#d0743c"]);
 
   function randomData (){
     var labels = color_pie.domain();
