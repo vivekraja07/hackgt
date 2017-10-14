@@ -315,47 +315,50 @@ svg.selectAll("circle")
 
 function displayNewData(csv) {
   d3.csv(csv, function(data) {
-  var svg = d3.select("#map")
-  svg.selectAll("circle")
-    .data(data)
-    .enter()
-    .append("circle")
-    .attr("cx", function(d) {
-      return projection([d.lon, d.lat])[0];
-    })
-    .attr("cy", function(d) {
-      return projection([d.lon, d.lat])[1];
-    })
-    .attr("r", function(d) {
-      return Math.sqrt(d.transactions) * 5;
-    })
-      .style("fill", "rgb(217,91,67)")
-      .style("opacity", 0.85)
+    var svg = d3.select("#map")
+    svg.selectAll("circle")
+      .data(data)
+      .enter()
+      .append("circle")
+      .attr("cx", function(d) {
+        return projection([d.lon, d.lat])[0];
+      })
+      .attr("cy", function(d) {
+        return projection([d.lon, d.lat])[1];
+      })
+      .attr("r", function(d) {
+      .transition().duration(1000)
+        .attr("r",Math.sqrt(d.transactions) * 5);
+        // return Math.sqrt(d.transactions) * 5;
+      })
+        .style("fill", "rgb(217,91,67)")
+        .style("opacity", 0.85)
 
-    // Modification of custom tooltip code provided by Malcolm Maclean, "D3 Tips and Tricks"
-    // http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html
-    .on("mouseover", function(d) {
-        div.transition()
-             .duration(200)
-             .style("opacity", .9);
-        div.text(d.city)
-             .style("left", (d3.event.pageX) + "px")
-             .style("top", (d3.event.pageY) + "px");
-        if (d.city != "New York City") {
-          getCity(d.city.split(' ').join(''));
-        } else {
-          var resp = getCity('NewYork');
-          getCity('NewYork');
-        }
+        // Modification of custom tooltip code provided by Malcolm Maclean, "D3 Tips and Tricks"
+        // http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html
+        .on("mouseover", function(d) {
+            div.transition()
+                 .duration(200)
+                 .style("opacity", .9);
+            div.text(d.city)
+                 .style("left", (d3.event.pageX) + "px")
+                 .style("top", (d3.event.pageY) + "px");
+            if (d.city != "New York City") {
+              getCity(d.city.split(' ').join(''));
+            } else {
+              var resp = getCity('NewYork');
+              getCity('NewYork');
+            }
 
-    })
+        })
 
-      // fade out tooltip on mouse out
-      .on("mouseout", function(d) {
-          div.transition()
-             .duration(500)
-             .style("opacity", 0);
-      });
+          // fade out tooltip on mouse out
+          .on("mouseout", function(d) {
+              div.transition()
+                 .duration(500)
+                 .style("opacity", 0);
+          });
+    });
   });
 }
 

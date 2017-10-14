@@ -74,7 +74,6 @@ def totals():
 
 @app.route("/city/<string:city_name>")
 def city(city_name):
-  create_db()
   print("Getting data for "+ city_name)
   conn = sqlite3.connect('./db/database.db')
   c = conn.cursor()
