@@ -33,30 +33,6 @@ dept = {
   21: 'Misc'
 }
 
-<<<<<<< HEAD
-=======
-# dept['1']  = 'Frozen'
-# dept['2']  = 'Health'
-# dept['3']  = 'Grains'
-# dept['4']  = 'Fruits & Veggies'
-# dept['5']  = 'Alcohol'
-# dept['6']  = 'Foreign' #asian and mexican
-# dept['7']  = 'Beverages'
-# dept['8']  = 'Pet Food'
-# dept['9']  = 'Pasta & Rice' #sauces, pasta, rice
-# dept['10'] = 'Fruits & Veggies'
-# dept['11'] = 'Toiletries'
-# dept['12'] = 'Meats'
-# dept['13'] = 'Condiments' #biscuits
-# dept['14'] = 'Breakfast' #granola and such
-# dept['15'] = 'Canned Foods'
-# dept['16'] = 'Dairy'
-# dept['17'] = 'Cleaning Supplies'
-# dept['18'] = 'Baby Food'
-# dept['19'] = 'Snacks' #chips, crackers, craisins, etc
-# dept['20'] = 'Deli' #deli stuff, salads, meat
-# dept['21'] = 'Misc'
-
 def create_db():
   conn = sqlite3.connect('./db/database.db')
   conn.text_factory = lambda x: unicode(x, "utf-8", "ignore")
@@ -88,10 +64,7 @@ def create_db():
 
 create_db()
 
->>>>>>> 2d75e5c2b597c34f2fa180a4f94b0b302e1d4790
 app = Flask(__name__)
-# app.config['SQLAlchemy_DATABASE_URI'] = 'sqlite:./db/database.db'
-# db = sa(app)
 
 @app.route("/")
 def main():
