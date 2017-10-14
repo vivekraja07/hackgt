@@ -28,9 +28,10 @@ def create_db():
       #               product_name text,
       #               department_id int,
       #               price real)''')
-    # print("INSERT INTO catalog VALUES ("+', '.join(row)+")")
+
     else:
-      c.execute("INSERT INTO catalog VALUES ("+', '.join(row)+")")
+      print("INSERT INTO catalog VALUES ('"+'\', '.join(row)+")")
+      # c.execute("INSERT INTO catalog VALUES ("+', '.join(row)+")")
 
   # conn.commit()
   f.close()
