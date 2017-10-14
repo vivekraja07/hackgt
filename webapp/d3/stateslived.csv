@@ -1,10 +1,10 @@
 state,visited
-Alabama,0
+Alabama,2
 Alaska,0
 Arkansas,0
 Arizona,2
 California,2
-Colorado,0
+Colorado,2
 Connecticut,0
 Delaware,0
 Florida,2
@@ -13,7 +13,7 @@ Hawaii,0
 Iowa,0
 Idaho,0
 Illinois,2
-Indiana,0
+Indiana,2
 Kansas,0
 Kentucky,0
 Louisiana,0
@@ -26,7 +26,7 @@ Missouri,0
 Mississippi,0
 Montana,0
 North Carolina,0
-North Dakota,0
+North Dakota,2
 Nebraska,0
 New Hampshire,0
 New Jersey,0
@@ -35,7 +35,7 @@ Nevada,0
 New York,2
 Ohio,0
 Oklahoma,0
-Oregon,0
+Oregon,2
 Pennsylvania,2
 Rhode Island,0
 South Carolina,0

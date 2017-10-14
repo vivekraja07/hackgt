@@ -70,6 +70,7 @@ function makeCORSRequest(url,city) {
             {label: 'Deli',                 value: json['Deli']['Transactions']/total_trans}
         ];
         var info = [city,total_trans,total_rev];
+        console.log(info)
         change(data,info);
     };
     xhr.onerror = function() {
@@ -78,8 +79,9 @@ function makeCORSRequest(url,city) {
     xhr.send();
 }
 
-function getCity(city,city_info) {
-    makeCORSRequest("http://localhost:5000/city/" + city,city_info);
+function getCity(city,city_name) {
+    console.log(city)
+    makeCORSRequest("http://localhost:5000/city/" + city,city_name);
 }
 
 function getTotal(city) {

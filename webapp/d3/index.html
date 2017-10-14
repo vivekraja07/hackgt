@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <script src="http://d3js.org/d3.v3.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
-<script src="js/d3.slider.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script> -->
+<!-- <script src="js/d3.slider.js"></script> -->
 <script src="api.js"></script>
 <link rel="stylesheet" href="css/index.css">
 
@@ -127,7 +127,7 @@ d3.csv("stateslived.csv", function(data) {
         div.text(d.city)
           .style("left", (d3.event.pageX) + "px")
           .style("top", (d3.event.pageY) + "px");
-        if (d.city != "New York City") {
+        if (d.city != "New York City ") {
           getCity(d.city.split(' ').join(''),d.city);
         } else {
           var resp = getCity('NewYork');
@@ -309,7 +309,7 @@ d3.csv("stateslived.csv", function(data) {
       .remove();
   };
 </script>
-<div id="slider3"></div>
+<!-- <div id="slider3"></div> -->
 <!--
 <!-- Timeline Stuff
 <script type="text/javascript">
