@@ -42,7 +42,9 @@ def main():
   d = {
     'Requests' : {
       '/totals' : 'List of transaction and revenue totals for each department',
-      '/city/:city/' : 'List of transaction revenue totals for a specific city'
+      '/city/:city/' : 'List of transaction revenue totals for a specific city' :{
+        'cities' : 'New York, Los Angeles, Chicago, Houston, Philadelphia'
+      }
     }
   }
   create_db()
