@@ -122,7 +122,6 @@ def city(city_name):
 if __name__ == "__main__":
   app.run()
 
-
 def create_db():
   conn = sqlite3.connect('./db/database.db')
   conn.text_factory = lambda x: unicode(x, "utf-8", "ignore")
