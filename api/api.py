@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask,jsonify
 import sys
 import sqlalchemy as sa
 import csv
@@ -31,22 +31,13 @@ def create_db():
       #               price real)''')
 
     else:
-      # print("INSERT INTO catalog VALUES ('"+'\', \''.join(row)+"\')")
-      print("INSERT INTO catalog VALUES ("+row[0]+","+row[1]+","+row[2]+",'"+row[3]+"',"+row[4]+","+row[5]+")")
-      # c.execute("INSERT INTO catalog VALUES ("+row[0]+","+row[1]+","+row[2]+",'"+row[3]+"',"+row[4]+","+row[5]+")")
+      # print("INSERT INTO catalog VALUES ("+row[0]+","+row[1]+","+row[2]+",'"+row[3]+"',"+row[4]+","+row[5]+")")
       c.execute("INSERT INTO catalog VALUES (?,?,?,?,?,?)", row)
-
+      conn.commit()
   conn.commit()
   f.close()
 
 create_db()
-# df = pd.read_csv(file_name)
-# pd.read_csv(file_name)
-# df.to_sql(con=engine, index_label='id',name=catalog.__tablename__, if_exists='replace')
-
-
-
-
 
 app = Flask(__name__)
 # app.config['SQLAlchemy_DATABASE_URI'] = 'sqlite:./db/database.db'
@@ -59,7 +50,7 @@ def hello():
   c = conn.cursor()
   orders = c.execute("SELECT * FROM catalog")
   json_string = json.dumps(c.fetchall())
-  return "This is our api" +json_string
+  return jsonify(json_string)
 
 @app.route("/city/<string:city>/")
 def city(city):
