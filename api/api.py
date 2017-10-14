@@ -11,6 +11,7 @@ import json
 
 def create_db():
   conn = sqlite3.connect('./db/database.db')
+  conn.text_factory = lambda x: unicode(x, "utf-8", "ignore")
   c = conn.cursor()
   c.execute("DROP TABLE catalog")
   c.execute('''CREATE TABLE catalog
@@ -32,6 +33,7 @@ def create_db():
       column_names = False
     else:
       # print("INSERT INTO catalog VALUES ("+row[0]+","+row[1]+","+row[2]+",'"+row[3]+"',"+row[4]+","+row[5]+")")
+
       c.execute("INSERT INTO catalog VALUES (?,?,?,?,?,?)", row)
   conn.commit()
   f.close()
