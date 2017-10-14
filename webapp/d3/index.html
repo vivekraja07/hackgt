@@ -151,6 +151,51 @@ d3.csv("stateslived.csv", function(data) {
         return Math.sqrt(d.transactions) * 5;
       });
     });
+
+
+  // Map the cities I have lived in!
+  d3.csv("csv/warehouse.csv", function(data) {
+    svg.selectAll("rect#warehouse")
+      .data(data)
+      .enter()
+      .append("rect")
+      .attr("x", function(d) {
+        return d.x;
+      })
+      .attr("y", function(d) {
+        return d.y;
+      })
+      .style("fill", "rgb(0,0,0)")
+      .style("opacity", 0.85)
+      // Modification of custom tooltip code provided by Malcolm Maclean, "D3 Tips and Tricks"
+      // http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html
+      .on("mouseover", function(d) {
+        div.transition()
+          .duration(200)
+          .style("opacity", .9);
+        div.text(d.city)
+          .style("left", (d3.event.pageX) + "px")
+          .style("top", (d3.event.pageY) + "px");
+        d3.svg.path();
+      })
+      // fade out tooltip on mouse out
+      .on("mouseout", function(d) {
+        div.transition()
+         .duration(500)
+         .style("opacity", 0)
+      })
+      .attr("transform","rotate(45 485 237)")
+      .attr("width",1)
+      .transition().duration(1000)
+      .attr("width", function(d) {
+        return d.size;
+      })
+      .attr("height",1)
+      .transition().duration(1000)
+      .attr("height", function(d) {
+        return d.size;
+      });
+    });
   });
 });
 
