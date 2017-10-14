@@ -33,35 +33,6 @@ dept = {
   21: 'Misc'
 }
 
-def create_db():
-  conn = sqlite3.connect('./db/database.db')
-  conn.text_factory = lambda x: unicode(x, "utf-8", "ignore")
-  c = conn.cursor()
-  c.execute("DROP TABLE catalog")
-  c.execute('''CREATE TABLE catalog
-               (order_number int,
-                product_id int,
-                customer_id int,
-                product_name text,
-                department_id int,
-                price real)''')
-
-  file_name = '../10000_transactions.csv'
-  f = open(file_name,'rt')
-  reader = csv.reader(f)
-  column_names = True
-  for row in reader:
-    # print(row)
-    # print(c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='catalog'"))
-    if column_names:
-      column_names = False
-    else:
-      # print("INSERT INTO catalog VALUES ("+row[0]+","+row[1]+","+row[2]+",'"+row[3]+"',"+row[4]+","+row[5]+")")
-
-      c.execute("INSERT INTO catalog VALUES (?,?,?,?,?,?)", row)
-  conn.commit()
-  f.close()
-
 create_db()
 
 app = Flask(__name__)
