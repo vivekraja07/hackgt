@@ -92,7 +92,19 @@ app = Flask(__name__)
 
 @app.route("/")
 def main():
-  print('Python version ' + sys.version)
+  conn = sqlite3.connect('./db/database.db')
+  c = conn.cursor()
+  d = {
+    'Requests' : {
+      '/totals' : 'List of order/transaction totals for each department',
+      '/city/:city/' : 'List of order/transaction totals for a specific city'
+    }
+  }
+
+  return jsonify(d)
+
+@app.route("/totals")
+def default():
   conn = sqlite3.connect('./db/database.db')
   c = conn.cursor()
   d = dict()
@@ -100,6 +112,7 @@ def main():
     orders = c.execute("SELECT COUNT(DISTINCT order_number) FROM catalog WHERE department_id = "+str(x))
     d[dept[x]]= json.dumps(c.fetchall()[0][0])#orders
   return jsonify(d)
+
 
 @app.route("/city/<string:city>/")
 def city(city):
