@@ -1,4 +1,5 @@
 from flask import Flask,jsonify,render_template
+from flask_cors import CORS
 import sys
 import csv
 import sqlite3
@@ -34,6 +35,7 @@ dept = {
 }
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route("/")
 def main():
