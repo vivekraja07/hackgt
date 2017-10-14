@@ -31,16 +31,20 @@ body {
   background-color: #ccc;
 }
 
+svg#map {
+  max-height: 100%;
+  max-width: 60%
+}
+
+svg#pie {
+  max-height: 100%;
+  max-width: 40%
+}
+
+
 div {
   height: 500px;
 }
-/*
-svg.pie {
-  max-width: 100%;
-  max-height: 100%;
-  width: 500px;
-  height: 500px;
-}*/
 
 /* Legend Position Style */
 .legend {
@@ -101,11 +105,12 @@ var color = d3.scale.linear()
 //Create SVG element and append map to the SVG
 var svg = d3.select("body")
 			.append("svg")
+      .attr("id","map")
 			.attr("width", width)
 			.attr("height", height);
 
 // Append Div for tooltip to SVG
-var div = d3.select("div")
+var div = d3.select("body")
 		    .append("div")
     		.attr("class", "tooltip")
     		.style("opacity", 0);
@@ -236,6 +241,7 @@ var legend = d3.select("div").append("svg")
 
   var pie_svg = d3.select("body")
     .append("svg")
+    .attr("id","pie")
     .attr("width",700)
     .attr("height",500)
     .append("g")
