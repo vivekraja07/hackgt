@@ -189,23 +189,33 @@ d3.csv("stateslived.csv", function(data) {
           .style("opacity", .9);
         div.text(d.city)
           .style("left", (d.x) + "px")
-          .style("top", (d.y) + "px")
-          .style('margin-right',"-10px");
+          .style("top", (d.y) + "px");
         div.append("svg")
           .attr("width",750)
           .attr("height",450)
           .attr("id","path")
           .attr("transform","translate(-400, -250)");
+        //topeka -> cali
         drawRoutes([{"x": 397,"y": 246}, {"x": 282,"y": 225},
                     {"x": 170,"y": 321}, {"x": 95, "y": 320},
-                    {"x": 84, "y": 295}, {"x": 48, "y": 219}],"linear");
+                    {"x": 84, "y": 295}, {"x": 48, "y": 219},
+                    {"x": 80, "y": 80}],"linear");
+        //topeka -> NYC
         drawRoutes([{"x": 397,"y": 246}, {"x": 510,"y": 185},
                     {"x": 686,"y": 180},],"cardinal");
+        //topeka -> texas -> NYC
         drawRoutes([{"x": 397,"y": 246}, {"x": 390,"y": 357},
                     {"x": 415,"y": 405}, {"x": 510,"y": 355},
                     {"x": 686,  "y": 180}],"cardinal");
+        //texas -> texas
         drawRoutes([{"x": 390,"y": 357},{"x": 374,"y": 396},
                     {"x": 363,"y": 412}],"linear");
+        // Chicago -> North Dakota
+        drawRoutes([{"x": 510,"y": 185},{"x": 450,"y": 125},{"x": 392,"y": 106}],"cardinal");
+        // Chicago -> Indianapolis
+        drawRoutes([{"x": 510,"y": 185},{"x": 533,"y": 224}],"linear");
+        // Birmingham -> jacksonville
+        drawRoutes([{"x": 534,"y": 333},{"x": 617,"y": 380}],"linear");
       })
       // fade out tooltip on mouse out
       .on("mouseout", function(d) {
