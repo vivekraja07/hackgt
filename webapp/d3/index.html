@@ -196,11 +196,16 @@ d3.csv("stateslived.csv", function(data) {
           .attr("height",450)
           .attr("id","path")
           .attr("transform","translate(-400, -250)");
-        drawRoutes([{"x": 397, "y": 246}, {"x": 282,"y": 225},
-                    {"x": 170, "y": 321}, {"x": 95, "y": 320},
-                    {"x": 84,  "y": 295}, {"x": 48, "y": 219}],"linear");
-        drawRoutes([{"x": 397, "y": 246}, {"x": 510,"y": 185},
-                    {"x": 686,  "y": 180},],"cardinal");
+        drawRoutes([{"x": 397,"y": 246}, {"x": 282,"y": 225},
+                    {"x": 170,"y": 321}, {"x": 95, "y": 320},
+                    {"x": 84, "y": 295}, {"x": 48, "y": 219}],"linear");
+        drawRoutes([{"x": 397,"y": 246}, {"x": 510,"y": 185},
+                    {"x": 686,"y": 180},],"cardinal");
+        drawRoutes([{"x": 397,"y": 246}, {"x": 390,"y": 357},
+                    {"x": 415,"y": 405}, {"x": 510,"y": 355},
+                    {"x": 686,  "y": 180}],"cardinal");
+        drawRoutes([{"x": 390,"y": 357},{"x": 374,"y": 396},
+                    {"x": 363,"y": 412}],"linear");
       })
       // fade out tooltip on mouse out
       .on("mouseout", function(d) {
