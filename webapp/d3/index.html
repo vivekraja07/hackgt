@@ -314,6 +314,11 @@ d3.csv("stateslived.csv", function(data) {
     slice
       .on("mouseover", function(d) {
         var dept = d['data']['label'];
+        if(info[0] == 'New York City')
+          city = NewYork;
+        else{
+          city = info[0].split(' ').join('')
+        }
         getDeptInfo(info[0],dept);
       })
       .transition().duration(1000)
@@ -407,8 +412,6 @@ d3.csv("stateslived.csv", function(data) {
     .attr("width","100%")
     .attr("height",500)
     .append("g");
-
-
 
 </script>
 <!-- <div id="slider3"></div> -->

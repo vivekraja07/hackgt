@@ -96,8 +96,21 @@ def city(city_name):
       d[dept[x]]['Revenue'] = '$' + str(round(float(value),2))
   return jsonify(d)
 
-# @app.route("/city/<string:city_name>/dept/<string:dept_name>")
-# def city(city_name,dept_name):
+@app.route("/city/<string:city_name>/dept/<string:dept_name>")
+def deptartment(city_name,dept_name):
+  conn = sqlite3.connect('./db/database.db')
+  c = conn.cursor()
+  department_id = -1
+  for key,value in dept.items():
+    if value == dept_name:
+      department_id = key
+  orders = c.execute("SELECT product_name,COUNT(*) FROM catalog WHERE product_name in ("+
+    "SELECT distinct product_name FROM catalog WHERE department_id="+str(department_id)+" and city = '"+city_name+"') GROUP BY product_name")
+  values = json.dumps(dict(c.fetchall()))
+  # for value in values:
+    # print(value)
+  # print(d["Alaskan Salmon Burgers"])
+  return values
 
 @app.route("/store/<string:city_name>/<int:num_customers>/")
 def store(city_name, num_customers):

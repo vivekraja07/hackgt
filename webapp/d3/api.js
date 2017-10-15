@@ -88,7 +88,8 @@ function getTotal(city) {
     makeCORSRequest("http://localhost:5000/totals","All Orders");
 }
 
-function makeCORSRequestDept(url,city) {
+function makeCORSRequestDept(url) {
+   console.log(url);
     var xhr = createCORSRequest('GET', url);
     if (!xhr) {
         alert('CORS not supported');
@@ -96,8 +97,9 @@ function makeCORSRequestDept(url,city) {
     }
     xhr.onload = function() {
         var text = xhr.responseText;
+        // console.log(text);
         json = JSON.parse(text);
-        consol.log(json);
+        console.log(json);
     };
     xhr.onerror = function() {
         alert('Error making the request.');
@@ -106,6 +108,6 @@ function makeCORSRequestDept(url,city) {
 }
 
 function getDeptInfo(city,dept) {
-  makeCORSRequestDept("http://localhost:5000/city/"+city+"dept/"+dept);
+  makeCORSRequestDept("http://localhost:5000/city/"+city+"/dept/"+dept);
 }
 
