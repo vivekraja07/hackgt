@@ -162,6 +162,54 @@ d3.csv("stateslived.csv", function(data) {
      .attr("fill", "none");
   }
 
+  var table = d3.select("body").append("table");
+
+  d3.csv("./csv/tabledata.csv", function(error, data) {
+		if (error) throw error;
+		  
+	  var sortAscending = true;
+	  
+    table.style("opacity", 0);
+	  var titles = d3.keys(data[0]);
+	  var headers = table.append('thead').append('tr')
+	                   .selectAll('th')
+	                   .data(titles).enter()
+	                   .append('th')
+	                   .text(function (d) {
+		                    return d;
+	                    })
+	                   .on('click', function (d) {
+	                	   headers.attr('class', 'header');
+	                	   
+	                	   if (sortAscending) {
+	                	     rows.sort(function(a, b) { return b[d] < a[d]; });
+	                	     sortAscending = false;
+	                	     this.className = 'aes';
+	                	   } else {
+	                		 rows.sort(function(a, b) { return b[d] > a[d]; });
+	                		 sortAscending = true;
+	                		 this.className = 'des';
+	                	   }
+	                	   
+	                   });
+	  
+	  var rows = table.append('tbody').selectAll('tr')
+	               .data(data).enter().append('tr');
+		  rows.selectAll('td')
+		    .data(function (d) {
+		    	return titles.map(function (k) {
+		    		return { 'value': d[k], 'name': k};
+		    	});
+		    }).enter()
+		    .append('td')
+		    .attr('data-th', function (d) {
+		    	return d.name;
+		    })
+		    .text(function (d) {
+		    	return d.value;
+		    });
+	  });
+
   // Map the cities I have lived in!
   d3.csv("csv/warehouse.csv", function(data) {
     svg.selectAll("rect#warehouse")
@@ -179,6 +227,7 @@ d3.csv("stateslived.csv", function(data) {
       // Modification of custom tooltip code provided by Malcolm Maclean, "D3 Tips and Tricks"
       // http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html
       .on("mouseover", function(d) {
+        table.transition().duration(800).style("opacity", 100);
         div.transition()
           .duration(200)
           .style("opacity", .9);
@@ -217,6 +266,8 @@ d3.csv("stateslived.csv", function(data) {
         div.transition()
          .duration(500)
          .style("opacity", 0)
+         table.style("opacity", 0);
+         table.transition().duration(800).style("opacity", 0);
       })
       .attr("transform","rotate(45 485 237)")
       .attr("width",1)
@@ -406,12 +457,7 @@ d3.csv("stateslived.csv", function(data) {
       .remove();
   };
 
-  var svg_warehouse = d3.select("body")
-    .append("svg")
-    .attr("id","warehouse")
-    .attr("width","100%")
-    .attr("height",500)
-    .append("g");
+  
 
 </script>
 <!-- <div id="slider3"></div> -->
