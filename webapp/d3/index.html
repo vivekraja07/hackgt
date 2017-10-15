@@ -154,15 +154,12 @@ d3.csv("stateslived.csv", function(data) {
       });
     });
 
-  function drawRoutes() {
+  function drawRoutes(lineData,interpolation) {
     var svgContainer = d3.select("#path");
-    var lineData = [ { "x": 397,   "y": 246},  { "x": 282,  "y": 225},
-                     { "x": 170,  "y": 321}, { "x": 95,  "y": 320},
-                     { "x": 84,  "y": 295},  { "x": 48, "y": 219}];
     var lineFunction = d3.svg.line()
         .x(function(d) { return d.x; })
         .y(function(d) { return d.y; })
-        .interpolate("linear");
+        .interpolate(interpolation);
     var lineGraph = svgContainer.append("path")
      .attr("d", lineFunction(lineData))
      .attr("stroke", "blue")
@@ -199,7 +196,11 @@ d3.csv("stateslived.csv", function(data) {
           .attr("height",450)
           .attr("id","path")
           .attr("transform","translate(-400, -250)");
-        drawRoutes();
+        drawRoutes([{"x": 397, "y": 246}, {"x": 282,"y": 225},
+                    {"x": 170, "y": 321}, {"x": 95, "y": 320},
+                    {"x": 84,  "y": 295}, {"x": 48, "y": 219}],"linear");
+        drawRoutes([{"x": 397, "y": 246}, {"x": 510,"y": 185},
+                    {"x": 686,  "y": 180},],"cardinal");
       })
       // fade out tooltip on mouse out
       .on("mouseout", function(d) {
