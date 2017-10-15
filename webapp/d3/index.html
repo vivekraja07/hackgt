@@ -126,7 +126,7 @@ d3.csv("stateslived.csv", function(data) {
       })
       .on("mouseover", function(d) {
         // div;
-        if (d.city != "New York City ") {
+        if (d.city != "New York City") {
           getCity(d.city.split(' ').join(''),d.city);
         } else {
           var resp = getCity('NewYork');
