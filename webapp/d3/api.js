@@ -88,3 +88,24 @@ function getTotal(city) {
     makeCORSRequest("http://localhost:5000/totals","All Orders");
 }
 
+function makeCORSRequestDept(url,city) {
+    var xhr = createCORSRequest('GET', url);
+    if (!xhr) {
+        alert('CORS not supported');
+        return;
+    }
+    xhr.onload = function() {
+        var text = xhr.responseText;
+        json = JSON.parse(text);
+        consol.log(json);
+    };
+    xhr.onerror = function() {
+        alert('Error making the request.');
+    };
+    xhr.send();
+}
+
+function getDeptInfo(city,dept) {
+  makeCORSRequestDept("http://localhost:5000/city/"+city+"dept/"+dept);
+}
+

@@ -96,6 +96,9 @@ def city(city_name):
       d[dept[x]]['Revenue'] = '$' + str(round(float(value),2))
   return jsonify(d)
 
+@app.route("/city/<string:city_name>/dept/<string:dept_name>")
+def city(city_name,dept_name):
+
 @app.route("/store/<string:city_name>/<int:num_customers>/")
 def store(city_name, num_customers):
   print("Getting data for store in " + city_name)
