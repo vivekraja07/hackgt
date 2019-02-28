@@ -6,8 +6,6 @@ import sqlite3
 import json
 import math
 
-# engine = sa.create_engine('sqlite:///database.db')
-# Base.metadata.create_all(engine)
 
 dept = {
   0 : 'All Orders',
@@ -41,11 +39,7 @@ CORS(app)
 def main():
   conn = sqlite3.connect('./db/database.db')
   c = conn.cursor()
-  create_db()
-  # orders = c.execute("SELECT * from ((SELECT distinct customer_id,order_number,product_id,product_name,price,department_id from catalog where order_number in (select distinct customer_id from catalog GROUP BY order_number having count(order_number) > 1 Limit 2) as mid where order_number = mid.order_number and customer_id = mid.customer_id) as m join catalog as c on m.customer_id = c.customer_id) ")
-  # data = json.dumps(c.fetchall())
-  # print(data)
-  # return jsonify(data)
+  # create_db()
   return render_template("docs.html")
 
 @app.route("/totals")

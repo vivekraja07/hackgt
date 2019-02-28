@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script> -->
+  <!-- <script src="js/d3.slider.js"></script> -->
+  <script src="api.js"></script>
+  <link rel="stylesheet" href="css/index.css">
+
+</head>
+
+<body>
+
+  <script type="text/javascript">
+    /*  This visualization was made possible by modifying code provided by:
+    
+    Scott Murray, Choropleth example from "Interactive Data Visualization for the Web"
+    https://github.com/alignedleft/d3-book/blob/master/chapter_12/05_choropleth.html
+    
+    Malcolm Maclean, tooltips example tutorial
+    http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html
+    
+    Mike Bostock, Pie Chart Legend
+    http://bl.ocks.org/mbostock/3888852  */
+
+
+    //Width and height of map
+    var width = 960;
+    var height = 500;
+
+    // D3 Projection
+    var projection = d3.geo.albersUsa()
+      .translate([width / 2, height / 2])    // translate to center of screen
+      .scale([1000]);          // scale things down so see entire US
+
+    // Define path generator
+    var path = d3.geo.path()               // path generator that will convert GeoJSON to SVG paths
+      .projection(projection);  // tell path generator to use albersUsa projection
+
+
+    // Define linear scale for output
+    var color = d3.scale.linear()
+      .range(["rgb(213,222,217)", "rgb(69,173,168)", "#22593b", "rgb(217,91,67)"]);
+
+    //Create SVG element and append map to the SVG
+    var svg = d3.select("body")
+      .append("svg")
+      .attr("id", "map")
+      .attr("width", width)
+      .attr("height", height);
+
+    // Append Div for tooltip to SVG
+    var div = d3.select("body")
+      .append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
+
+    // Load in my states data!
+    d3.csv("stateslived.csv", function (data) {
+      color.domain([0, 1, 2, 3]); // setting the range of the input data
+      // Load GeoJSON data and merge with states data
+      d3.json("us-states.json", function (json) {
+        // Loop through each state data value in the .csv file
+        for (var i = 0; i < data.length; i++) {
+          // Grab State Name
+          var dataState = data[i].state;
+          // Grab data value
+          var dataValue = data[i].visited;
+          // Find the corresponding state inside the GeoJSON
+          for (var j = 0; j < json.features.length; j++) {
+            var jsonState = json.features[j].properties.name;
+            if (dataState == jsonState) {
+              // Copy the data value into the JSON
+              json.features[j].properties.visited = dataValue;
+              // Stop looking through the JSON
+              break;
+            }
+          }
+        }
+
+        // Bind the data to the SVG and create one path per GeoJSON feature
+        svg.selectAll("path")
+          .data(json.features)
+          .enter()
+          .append("path")
+          .attr("d", path)
+          .style("stroke", "#fff")
+          .style("stroke-width", "2")
+          .style("fill", function (d) {
+            // Get data value
+            var value = d.properties.visited;
+            if (value) {
+              //If value exists…
+              return color(value);
+            } else {
+              //If value is undefined…
+              return "rgb(213,222,217)";
+            }
+          });
+
+        // Map the cities I have lived in!
+        d3.csv("csv/cities_8.csv", function (data) {
+          svg.selectAll("circle")
+            .data(data)
+            .enter()
+            .append("a")
+            .attr('href', "http://joeymurphy.me/store_efficiency")
+            .append("circle")
+            .attr("cx", function (d) {
+              return projection([d.lon, d.lat])[0];
+            })
+            .attr("cy", function (d) {
+              return projection([d.lon, d.lat])[1];
+            })
+            .style("fill", "rgb(217,91,67)")
+            .style("opacity", 0.85)
+            // Modification of custom tooltip code provided by Malcolm Maclean, "D3 Tips and Tricks"
+            // http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html
+            .on("mousemove", function (d) {
+              div.transition()
+                .duration(200)
+                .style("opacity", .9);
+              div.text(d.city)
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY) + "px");
+            })
+            .on("mouseover", function (d) {
+              // div;
+              if (d.city != "New York City") {
+                console.log(d.city)
+                getCiti(d.city.split(' ').join(''), d.city);
+              } else {
+                // var resp = getCiti('NewYork');
+                console.log("resp: " + resp)
+                getCiti('NewYork', 'New York City');
+              }
+            })
+            // fade out tooltip on mouse out
+            .on("mouseout", function (d) {
+              div.transition()
+                .duration(500)
+                .style("opacity", 0)
+            })
+            .on("mouseclick", function (d) {
+              return "http://joeymurphy.me/store_efficiency";
+            })
+            .attr("r", 1)
+            .transition().duration(2000)
+            .attr("r", function (d) {
+              return Math.sqrt(d.transactions) * 5;
+            });
+        });
+
+        function drawRoutes(lineData, interpolation) {
+          var svgContainer = d3.select("#path");
+          var lineFunction = d3.svg.line()
+            .x(function (d) { return d.x; })
+            .y(function (d) { return d.y; })
+            .interpolate(interpolation);
+          var lineGraph = svgContainer.append("path")
+            .attr("d", lineFunction(lineData))
+            .attr("stroke", "blue")
+            .attr("stroke-width", 2)
+            .attr("fill", "none");
+        }
+
+        var table = d3.select("body").append("table");
+
+        d3.csv("./csv/tabledata.csv", function (error, data) {
+          if (error) throw error;
+
+          var sortAscending = true;
+
+          table.style("opacity", 0);
+          var titles = d3.keys(data[0]);
+          var headers = table.append('thead').append('tr')
+            .selectAll('th')
+            .data(titles).enter()
+            .append('th')
+            .text(function (d) {
+              return d;
+            })
+            .on('click', function (d) {
+              headers.attr('class', 'header');
+
+              if (sortAscending) {
+                rows.sort(function (a, b) { return b[d] < a[d]; });
+                sortAscending = false;
+                this.className = 'aes';
+              } else {
+                rows.sort(function (a, b) { return b[d] > a[d]; });
+                sortAscending = true;
+                this.className = 'des';
+              }
+
+            });
+
+          var rows = table.append('tbody').selectAll('tr')
+            .data(data).enter().append('tr');
+          rows.selectAll('td')
+            .data(function (d) {
+              return titles.map(function (k) {
+                return { 'value': d[k], 'name': k };
+              });
+            }).enter()
+            .append('td')
+            .attr('data-th', function (d) {
+              return d.name;
+            })
+            .text(function (d) {
+              return d.value;
+            });
+        });
+
+        // Map the cities I have lived in!
+        d3.csv("csv/warehouse.csv", function (data) {
+          svg.selectAll("rect#warehouse")
+            .data(data)
+            .enter()
+            .append("rect")
+            .attr("x", function (d) {
+              return d.x;
+            })
+            .attr("y", function (d) {
+              return d.y;
+            })
+            .style("fill", "rgb(0,0,0)")
+            .style("opacity", 0.85)
+            // Modification of custom tooltip code provided by Malcolm Maclean, "D3 Tips and Tricks"
+            // http://www.d3noob.org/2013/01/adding-tooltips-to-d3js-graph.html
+            .on("mouseover", function (d) {
+              table.transition().duration(800).style("opacity", 100);
+              div.transition()
+                .duration(200)
+                .style("opacity", .9);
+              div.text(d.city)
+                .style("left", (d.x) + "px")
+                .style("top", (d.y) + "px");
+              div.append("svg")
+                .attr("width", 750)
+                .attr("height", 450)
+                .attr("id", "path")
+                .attr("transform", "translate(-400, -250)");
+              //topeka -> cali -> oregon
+              drawRoutes([{ "x": 397, "y": 246 }, { "x": 282, "y": 225 },
+              { "x": 170, "y": 321 }, { "x": 95, "y": 320 },
+              { "x": 84, "y": 295 }, { "x": 48, "y": 219 },
+              { "x": 80, "y": 80 }], "linear");
+              //topeka -> NYC
+              drawRoutes([{ "x": 397, "y": 246 }, { "x": 510, "y": 185 },
+              { "x": 686, "y": 180 },], "cardinal");
+              //topeka -> texas -> NYC
+              drawRoutes([{ "x": 397, "y": 246 }, { "x": 390, "y": 357 },
+              { "x": 415, "y": 405 }, { "x": 510, "y": 355 },
+              { "x": 686, "y": 180 }], "cardinal");
+              //texas -> texas
+              drawRoutes([{ "x": 390, "y": 357 }, { "x": 374, "y": 396 },
+              { "x": 363, "y": 412 }], "linear");
+              // Chicago -> North Dakota
+              drawRoutes([{ "x": 510, "y": 185 }, { "x": 450, "y": 125 }, { "x": 392, "y": 106 }], "cardinal");
+              // Chicago -> Indianapolis
+              drawRoutes([{ "x": 510, "y": 185 }, { "x": 533, "y": 224 }], "linear");
+              // Birmingham -> jacksonville
+              drawRoutes([{ "x": 534, "y": 333 }, { "x": 617, "y": 380 }], "linear");
+            })
+            // fade out tooltip on mouse out
+            .on("mouseout", function (d) {
+              div.transition()
+                .duration(500)
+                .style("opacity", 0)
+              table.style("opacity", 0);
+              table.transition().duration(800).style("opacity", 0);
+            })
+            .attr("transform", "rotate(45 485 237)")
+            .attr("width", 1)
+            .transition().duration(1000)
+            .attr("width", function (d) {
+              return d.size;
+            })
+            .attr("height", 1)
+            .transition().duration(1000)
+            .attr("height", function (d) {
+              return d.size;
+            });
+        });
+      });
+    });
+
+
+    // Donut D3 JS
+    var pie_svg = d3.select("body")
+      .append("svg")
+      .attr("id", "pie")
+      .attr("width", 800)
+      .attr("height", 500)
+      .append("g")
+
+    pie_svg.append("g")
+      .attr("class", "slices");
+    pie_svg.append("g")
+      .attr("class", "labels");
+    pie_svg.append("g")
+      .attr("class", "lines");
+    pie_svg.append("text")
+      .attr("class", "city_name")
+      .attr("text-anchor", "middle")
+      .attr("font-size", "36")
+      .attr("y", "-30");
+    pie_svg.append("text")
+      .attr("class", "total_trans")
+      .attr("text-anchor", "middle")
+      .attr("font-size", "16")
+      .attr("y", "10");
+    pie_svg.append("text")
+      .attr("class", "total_rev")
+      .attr("text-anchor", "middle")
+      .attr("font-size", "16")
+      .attr("y", "50");
+
+    var width = 700,
+      height = 500,
+      radius = Math.min(width, height) / 2;
+
+    var pie = d3.layout.pie()
+      .sort(null)
+      .value(function (d) {
+        return d.value;
+      });
+
+    var arc = d3.svg.arc()
+      .outerRadius(radius * 0.7)
+      .innerRadius(radius * 0.5);
+
+    var outerArc = d3.svg.arc()
+      .innerRadius(radius * 0.9)
+      .outerRadius(radius * 0.8);
+
+    pie_svg.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+    var key = function (d) { return d.data.label; };
+
+    var color_pie = d3.scale.ordinal()
+      .domain(["Frozen", "Health", "Grains", "Fruits & Veggies", "Alcohol", "Foreign",
+        "Beverages", "Pet Food", "Pasta & Rice", "Toiletries", "Meats", "Condiments",
+        "Breakfast", "Canned Foods", "Dairy", "Cleaning Supplies", "Baby Food",
+        "Snacks", "Deli", "Misc"])
+      .range(["#7DDF64", "#0dc453", "#719977", "#22593b", "#0dc453", "#d0743c"]);
+
+    function randomData() {
+      var labels = color_pie.domain();
+      return labels.map(function (label) {
+        return { label: label, value: Math.random() }
+      });
+    }
+
+    data = [{ "label": "Frozen", "value": 0.020216550657385923 }, { "label": "Health", "value": 0.00040216550657385926 }, { "label": "Grains", "value": 0.008909512761020881 }, { "label": "Fruits & Veggies", "value": 0.0002165506573859242 }, { "label": "Alcohol", "value": 0.0008043310131477185 }, { "label": "Foreign", "value": 0.0017633410672853829 }, { "label": "Beverages", "value": 0.019767981438515082 }, { "label": "Pet Food", "value": 0.0009126063418406806 }, { "label": "Pasta & Rice", "value": 0.0059396751740139215 }, { "label": "Toiletries", "value": 0.004331013147718484 }, { "label": "Meats", "value": 0.004207269914926527 }, { "label": "Condiments", "value": 0.01491105955143078 }, { "label": "Breakfast", "value": 0.005491105955143078 }, { "label": "Canned Foods", "value": 0.009636504253673628 }, { "label": "Dairy", "value": 0.04202629543696829 }, { "label": "Cleaning Supplies", "value": 0.004748646558391338 }, { "label": "Baby Food", "value": 0.004300077339520495 }, { "label": "Snacks", "value": 0.023047177107501933 }, { "label": "Deli", "value": 0.010997679814385151 }]
+    info = ["All Orders", "64650", "$411739.34"]
+    change(data, info);
+
+    function getCiti(city, city_name) {
+
+      if (city === "Portland") {
+        info = ["Portland", "1236", "$8265.42"]
+        data = [{ "label": "Frozen", "value": 0.09951456310679611 }, { "label": "Health", "value": 0 }, { "label": "Grains", "value": 0.03559870550161812 }, { "label": "Fruits & Veggies", "value": 0 }, { "label": "Alcohol", "value": 0.0040453074433656954 }, { "label": "Foreign", "value": 0.0048543689320388345 }, { "label": "Beverages", "value": 0.09061488673139159 }, { "label": "Pet Food", "value": 0.0040453074433656954 }, { "label": "Pasta & Rice", "value": 0.02831715210355987 }, { "label": "Toiletries", "value": 0.01779935275080906 }, { "label": "Meats", "value": 0.021844660194174758 }, { "label": "Condiments", "value": 0.063915857605178 }, { "label": "Breakfast", "value": 0.016181229773462782 }, { "label": "Canned Foods", "value": 0.03640776699029126 }, { "label": "Dairy", "value": 0.1593851132686084 }, { "label": "Cleaning Supplies", "value": 0.01699029126213592 }, { "label": "Baby Food", "value": 0.025080906148867314 }, { "label": "Snacks", "value": 0.0970873786407767 }, { "label": "Deli", "value": 0.0412621359223301 }]
+      } else if (city === "SanFrancisco") {
+        info = ["San Francisco", "1651", "$11459.06"]
+        data = data = [{ "label": "Frozen", "value": 0.08540278619018776 }, { "label": "Health", "value": 0.0018170805572380376 }, { "label": "Grains", "value": 0.03028467595396729 }, { "label": "Fruits & Veggies", "value": 0.0012113870381586917 }, { "label": "Alcohol", "value": 0.0036341611144760752 }, { "label": "Foreign", "value": 0.009691096305269533 }, { "label": "Beverages", "value": 0.07086614173228346 }, { "label": "Pet Food", "value": 0.0036341611144760752 }, { "label": "Pasta & Rice", "value": 0.028467595396729255 }, { "label": "Toiletries", "value": 0.016959418534221685 }, { "label": "Meats", "value": 0.013930950938824955 }, { "label": "Condiments", "value": 0.06359781950333132 }, { "label": "Breakfast", "value": 0.019382192610539067 }, { "label": "Canned Foods", "value": 0.03876438522107813 }, { "label": "Dairy", "value": 0.18655360387643852 }, { "label": "Cleaning Supplies", "value": 0.01877649909145972 }, { "label": "Baby Food", "value": 0.024227740763173834 }, { "label": "Snacks", "value": 0.09448818897637795 }, { "label": "Deli", "value": 0.05208964264082374 }]
+      } else if (city === "SanJose") {
+        info = ["San Jose", "1944", "$13514.0"]
+        data = [{ "label": "Frozen", "value": 0.08024691358024691 }, { "label": "Health", "value": 0 }, { "label": "Grains", "value": 0.03909465020576132 }, { "label": "Fruits & Veggies", "value": 0.00051440329218107 }, { "label": "Alcohol", "value": 0.00205761316872428 }, { "label": "Foreign", "value": 0.0051440329218107 }, { "label": "Beverages", "value": 0.09362139917695474 }, { "label": "Pet Food", "value": 0.00257201646090535 }, { "label": "Pasta & Rice", "value": 0.023148148148148147 }, { "label": "Toiletries", "value": 0.01800411522633745 }, { "label": "Meats", "value": 0.016975308641975308 }, { "label": "Condiments", "value": 0.06584362139917696 }, { "label": "Breakfast", "value": 0.022119341563786008 }, { "label": "Canned Foods", "value": 0.042695473251028807 }, { "label": "Dairy", "value": 0.17026748971193414 }, { "label": "Cleaning Supplies", "value": 0.01954732510288066 }, { "label": "Baby Food", "value": 0.016975308641975308 }, { "label": "Snacks", "value": 0.10236625514403293 }, { "label": "Deli", "value": 0.04938271604938271 }]
+      } else if (city === "LosAngeles") {
+        info = ["Los Angeles", "6116", "$53283.48"]
+        data = [{ "label": "Frozen", "value": 0.10840418574231524 }, { "label": "Health", "value": 0.002289077828646174 }, { "label": "Grains", "value": 0.04414650098103336 }, { "label": "Fruits & Veggies", "value": 0.0009810333551340746 }, { "label": "Alcohol", "value": 0.003760627861347286 }, { "label": "Foreign", "value": 0.007521255722694572 }, { "label": "Beverages", "value": 0.10170045781556573 }, { "label": "Pet Food", "value": 0.00474166121648136 }, { "label": "Pasta & Rice", "value": 0.031393067364290386 }, { "label": "Toiletries", "value": 0.02289077828646174 }, { "label": "Meats", "value": 0.019947678221059514 }, { "label": "Condiments", "value": 0.07553956834532374 }, { "label": "Breakfast", "value": 0.028613472858077176 }, { "label": "Canned Foods", "value": 0.05199476782210595 }, { "label": "Dairy", "value": 0.21778940483976456 }, { "label": "Cleaning Supplies", "value": 0.023871811641595814 }, { "label": "Baby Food", "value": 0.02485284499672989 }, { "label": "Snacks", "value": 0.118378024852845 }, { "label": "Deli", "value": 0.054774362328319164 }]
+      } else if (city === "SanDiego") {
+        info = ["San Diego", "2658", "$18962.84"]
+        data = [{ "label": "Frozen", "value": 0.08841234010534237 }, { "label": "Health", "value": 0.0015048908954100827 }, { "label": "Grains", "value": 0.03235515425131678 }, { "label": "Fruits & Veggies", "value": 0.001128668171557562 }, { "label": "Alcohol", "value": 0.005267118133935289 }, { "label": "Foreign", "value": 0.006772009029345372 }, { "label": "Beverages", "value": 0.08201655379984951 }, { "label": "Pet Food", "value": 0.004138449962377728 }, { "label": "Pasta & Rice", "value": 0.02633559066967645 }, { "label": "Toiletries", "value": 0.020316027088036117 }, { "label": "Meats", "value": 0.010534236267870579 }, { "label": "Condiments", "value": 0.07336343115124154 }, { "label": "Breakfast", "value": 0.018434913468773514 }, { "label": "Canned Foods", "value": 0.04251316779533484 }, { "label": "Dairy", "value": 0.19789315274642588 }, { "label": "Cleaning Supplies", "value": 0.021068472535741158 }, { "label": "Baby Food", "value": 0.019187358916478554 }, { "label": "Snacks", "value": 0.09932279909706546 }, { "label": "Deli", "value": 0.045522949586155007 }]
+      } else if (city === "Phoenix") {
+        info = ["Phoenix", "2842", "$20417.07"]
+        data = [{ "label": "Frozen", "value": 0.09007741027445461 }, { "label": "Health", "value": 0.0017593244194229415 }, { "label": "Grains", "value": 0.036593947923997186 }, { "label": "Fruits & Veggies", "value": 0.0014074595355383533 }, { "label": "Alcohol", "value": 0.0024630541871921183 }, { "label": "Foreign", "value": 0.007037297677691766 }, { "label": "Beverages", "value": 0.07670654468684025 }, { "label": "Pet Food", "value": 0.0028149190710767065 }, { "label": "Pasta & Rice", "value": 0.02498240675580577 }, { "label": "Toiletries", "value": 0.015833919774806474 }, { "label": "Meats", "value": 0.017593244194229415 }, { "label": "Condiments", "value": 0.06861365235749473 }, { "label": "Breakfast", "value": 0.02076002814919071 }, { "label": "Canned Foods", "value": 0.04257565095003519 }, { "label": "Dairy", "value": 0.1928219563687544 }, { "label": "Cleaning Supplies", "value": 0.017945109078114006 }, { "label": "Baby Food", "value": 0.021815622800844477 }, { "label": "Snacks", "value": 0.10661505981703026 }, { "label": "Deli", "value": 0.04609429978888107 }]
+      } else if (city === "Denver") {
+        info = ["Denver", "1273", "$8560.59"]
+        data = [{ "label": "Frozen", "value": 0.08562450903377848 }, { "label": "Health", "value": 0.002356637863315004 }, { "label": "Grains", "value": 0.022780832678711706 }, { "label": "Fruits & Veggies", "value": 0.0007855459544383347 }, { "label": "Alcohol", "value": 0.002356637863315004 }, { "label": "Foreign", "value": 0.007069913589945012 }, { "label": "Beverages", "value": 0.07541241162608013 }, { "label": "Pet Food", "value": 0.004713275726630008 }, { "label": "Pasta & Rice", "value": 0.024351924587588374 }, { "label": "Toiletries", "value": 0.015710919088766692 }, { "label": "Meats", "value": 0.016496465043205028 }, { "label": "Condiments", "value": 0.06755695208169678 }, { "label": "Breakfast", "value": 0.019638648860958365 }, { "label": "Canned Foods", "value": 0.04241948153967007 }, { "label": "Dairy", "value": 0.18303220738413198 }, { "label": "Cleaning Supplies", "value": 0.019638648860958365 }, { "label": "Baby Food", "value": 0.02199528672427337 }, { "label": "Snacks", "value": 0.09819324430479183 }, { "label": "Deli", "value": 0.04399057344854674 }]
+      } else if (city === "SanAntonio") {
+        info = ["San Antonio", "2638", "$18856.31"]
+        data = [{ "label": "Frozen", "value": 0.09287338893100834 }, { "label": "Health", "value": 0.0011372251705837756 }, { "label": "Grains", "value": 0.0401819560272934 }, { "label": "Fruits & Veggies", "value": 0.000758150113722517 }, { "label": "Alcohol", "value": 0.004548900682335102 }, { "label": "Foreign", "value": 0.00796057619408643 }, { "label": "Beverages", "value": 0.08377558756633814 }, { "label": "Pet Food", "value": 0.003411675511751327 }, { "label": "Pasta & Rice", "value": 0.029188779378316907 }, { "label": "Toiletries", "value": 0.018953752843062926 }, { "label": "Meats", "value": 0.016679302501895376 }, { "label": "Condiments", "value": 0.06254738438210766 }, { "label": "Breakfast", "value": 0.022744503411675512 }, { "label": "Canned Foods", "value": 0.04359363153904473 }, { "label": "Dairy", "value": 0.19901440485216074 }, { "label": "Cleaning Supplies", "value": 0.019332827899924184 }, { "label": "Baby Food", "value": 0.017058377558756634 }, { "label": "Snacks", "value": 0.10348749052312357 }, { "label": "Deli", "value": 0.04056103108415466 }]
+      } else if (city === "Austin") {
+        info = ["Austin", "1681", "$11609.52"]
+        data = [{ "label": "Frozen", "value": 0.08387864366448543 }, { "label": "Health", "value": 0.001784651992861392 }, { "label": "Grains", "value": 0.030339083878643664 }, { "label": "Fruits & Veggies", "value": 0.001189767995240928 }, { "label": "Alcohol", "value": 0.001189767995240928 }, { "label": "Foreign", "value": 0.007733491969066032 }, { "label": "Beverages", "value": 0.07733491969066032 }, { "label": "Pet Food", "value": 0.004759071980963712 }, { "label": "Pasta & Rice", "value": 0.020226055919095775 }, { "label": "Toiletries", "value": 0.017251635930993457 }, { "label": "Meats", "value": 0.013682331945270671 }, { "label": "Condiments", "value": 0.057108863771564544 }, { "label": "Breakfast", "value": 0.016061867935752528 }, { "label": "Canned Foods", "value": 0.044616299821534804 }, { "label": "Dairy", "value": 0.19214753123140987 }, { "label": "Cleaning Supplies", "value": 0.021415823914336704 }, { "label": "Baby Food", "value": 0.026174895895300417 }, { "label": "Snacks", "value": 0.09637120761451518 }, { "label": "Deli", "value": 0.04818560380725759 }]
+      } else if (city === "Houston") {
+        info = ["Houston", "3854", "$29648.94"]
+        data = [{ "label": "Frozen", "value": 0.09704203425012974 }, { "label": "Health", "value": 0.0020757654385054488 }, { "label": "Grains", "value": 0.03814218993253762 }, { "label": "Fruits & Veggies", "value": 0.0010378827192527244 }, { "label": "Alcohol", "value": 0.00233523611831863 }, { "label": "Foreign", "value": 0.006746237675142709 }, { "label": "Beverages", "value": 0.09989621172807472 }, { "label": "Pet Food", "value": 0.004929942916450441 }, { "label": "Pasta & Rice", "value": 0.026725480020757655 }, { "label": "Toiletries", "value": 0.01816294758692268 }, { "label": "Meats", "value": 0.015308770108977686 }, { "label": "Condiments", "value": 0.062272963155163466 }, { "label": "Breakfast", "value": 0.02542812662169175 }, { "label": "Canned Foods", "value": 0.04644525168655942 }, { "label": "Dairy", "value": 0.20653866113129216 }, { "label": "Cleaning Supplies", "value": 0.022833419823559936 }, { "label": "Baby Food", "value": 0.021795537104307212 }, { "label": "Snacks", "value": 0.11079398028022834 }, { "label": "Deli", "value": 0.0425531914893617 }]
+
+      } else if (city === "Dallas") {
+        info = ["Dallas", "2370", "$16960.97"]
+        data = [{ "label": "Frozen", "value": 0.08270042194092828 }, { "label": "Health", "value": 0.002109704641350211 }, { "label": "Grains", "value": 0.029957805907172997 }, { "label": "Fruits & Veggies", "value": 0.0012658227848101266 }, { "label": "Alcohol", "value": 0.0037974683544303796 }, { "label": "Foreign", "value": 0.004219409282700422 }, { "label": "Beverages", "value": 0.08945147679324894 }, { "label": "Pet Food", "value": 0.006329113924050633 }, { "label": "Pasta & Rice", "value": 0.02109704641350211 }, { "label": "Toiletries", "value": 0.0189873417721519 }, { "label": "Meats", "value": 0.016033755274261603 }, { "label": "Condiments", "value": 0.06962025316455696 }, { "label": "Breakfast", "value": 0.027848101265822784 }, { "label": "Canned Foods", "value": 0.039240506329113925 }, { "label": "Dairy", "value": 0.19873417721518988 }, { "label": "Cleaning Supplies", "value": 0.02278481012658228 }, { "label": "Baby Food", "value": 0.017721518987341773 }, { "label": "Snacks", "value": 0.10717299578059072 }, { "label": "Deli", "value": 0.043037974683544304 }]
+
+      } else if (city === "Birmingham") {
+        info = ["Birmingham", "551", "$3568.21"]
+        data = [{ "label": "Frozen", "value": 0.09800362976406533 }, { "label": "Health", "value": 0.003629764065335753 }, { "label": "Grains", "value": 0.041742286751361164 }, { "label": "Fruits & Veggies", "value": 0 }, { "label": "Alcohol", "value": 0.0054446460980036296 }, { "label": "Foreign", "value": 0.009074410163339383 }, { "label": "Beverages", "value": 0.0925589836660617 }, { "label": "Pet Food", "value": 0.009074410163339383 }, { "label": "Pasta & Rice", "value": 0.021778584392014518 }, { "label": "Toiletries", "value": 0.010889292196007259 }, { "label": "Meats", "value": 0.019963702359346643 }, { "label": "Condiments", "value": 0.0544464609800363 }, { "label": "Breakfast", "value": 0.012704174228675136 }, { "label": "Canned Foods", "value": 0.030852994555353903 }, { "label": "Dairy", "value": 0.16878402903811252 }, { "label": "Cleaning Supplies", "value": 0.021778584392014518 }, { "label": "Baby Food", "value": 0.014519056261343012 }, { "label": "Snacks", "value": 0.09800362976406533 }, { "label": "Deli", "value": 0.041742286751361164 }]
+
+      } else if (city === "Jacksonville") {
+        info = ["Jacksonville", "1666", "$11397.85"]
+        data = [{ "label": "Frozen", "value": 0.09603841536614646 }, { "label": "Health", "value": 0.003601440576230492 }, { "label": "Grains", "value": 0.03481392557022809 }, { "label": "Fruits & Veggies", "value": 0.0012004801920768306 }, { "label": "Alcohol", "value": 0.003001200480192077 }, { "label": "Foreign", "value": 0.005402160864345739 }, { "label": "Beverages", "value": 0.08703481392557023 }, { "label": "Pet Food", "value": 0.006002400960384154 }, { "label": "Pasta & Rice", "value": 0.027611044417767107 }, { "label": "Toiletries", "value": 0.01680672268907563 }, { "label": "Meats", "value": 0.013205282112845138 }, { "label": "Condiments", "value": 0.05702280912364946 }, { "label": "Breakfast", "value": 0.022809123649459785 }, { "label": "Canned Foods", "value": 0.03481392557022809 }, { "label": "Dairy", "value": 0.19567827130852342 }, { "label": "Cleaning Supplies", "value": 0.018607442977190875 }, { "label": "Baby Food", "value": 0.02220888355342137 }, { "label": "Snacks", "value": 0.08703481392557023 }, { "label": "Deli", "value": 0.04561824729891957 }]
+
+      } else if (city === "Philadelphia") {
+        info = ["Philadelphia", "2926", "$21053.64"]
+        data = [{ "label": "Frozen", "value": 0.08509911141490088 }, { "label": "Health", "value": 0.002050580997949419 }, { "label": "Grains", "value": 0.03315105946684894 }, { "label": "Fruits & Veggies", "value": 0.0017088174982911825 }, { "label": "Alcohol", "value": 0.003417634996582365 }, { "label": "Foreign", "value": 0.006151742993848257 }, { "label": "Beverages", "value": 0.08817498291182502 }, { "label": "Pet Food", "value": 0.0030758714969241286 }, { "label": "Pasta & Rice", "value": 0.028024606971975393 }, { "label": "Toiletries", "value": 0.018113465481886533 }, { "label": "Meats", "value": 0.017429938482570063 }, { "label": "Condiments", "value": 0.0645933014354067 }, { "label": "Breakfast", "value": 0.020847573479152427 }, { "label": "Canned Foods", "value": 0.0430622009569378 }, { "label": "Dairy", "value": 0.19651401230348597 }, { "label": "Cleaning Supplies", "value": 0.019822282980177717 }, { "label": "Baby Food", "value": 0.020164046479835954 }, { "label": "Snacks", "value": 0.09569377990430622 }, { "label": "Deli", "value": 0.04818865345181134 }]
+
+      } else if (city === "NewYorkCity") {
+        info = ["New York City", "9996", "$114575.95"]
+        data = [{ "label": "Frozen", "value": 0.13075230092036816 }, { "label": "Health", "value": 0.0026010404161664665 }, { "label": "Grains", "value": 0.057623049219687875 }, { "label": "Fruits & Veggies", "value": 0.0014005602240896359 }, { "label": "Alcohol", "value": 0.005202080832332933 }, { "label": "Foreign", "value": 0.011404561824729893 }, { "label": "Beverages", "value": 0.12785114045618248 }, { "label": "Pet Food", "value": 0.005902360944377751 }, { "label": "Pasta & Rice", "value": 0.03841536614645858 }, { "label": "Toiletries", "value": 0.028011204481792718 }, { "label": "Meats", "value": 0.027210884353741496 }, { "label": "Condiments", "value": 0.09643857543017206 }, { "label": "Breakfast", "value": 0.03551420568227291 }, { "label": "Canned Foods", "value": 0.062324929971988796 }, { "label": "Dairy", "value": 0.2718087234893958 }, { "label": "Cleaning Supplies", "value": 0.030712284913965587 }, { "label": "Baby Food", "value": 0.02781112444977991 }, { "label": "Snacks", "value": 0.14905962384953983 }, { "label": "Deli", "value": 0.07112845138055222 }]
+      } else if (city === "Indianapolis") {
+        info = ["Indianapolis", "1522", "$10935.37"]
+        data = [{ "label": "Frozen", "value": 0.06964520367936924 }, { "label": "Health", "value": 0.0019710906701708277 }, { "label": "Grains", "value": 0.03876478318002628 }, { "label": "Fruits & Veggies", "value": 0 }, { "label": "Alcohol", "value": 0.001314060446780552 }, { "label": "Foreign", "value": 0.007227332457293035 }, { "label": "Beverages", "value": 0.08475689881734559 }, { "label": "Pet Food", "value": 0.002628120893561104 }, { "label": "Pasta & Rice", "value": 0.021681997371879105 }, { "label": "Toiletries", "value": 0.01576872536136662 }, { "label": "Meats", "value": 0.01576872536136662 }, { "label": "Condiments", "value": 0.0657030223390276 }, { "label": "Breakfast", "value": 0.02102496714848883 }, { "label": "Canned Foods", "value": 0.040735873850197106 }, { "label": "Dairy", "value": 0.18659658344283836 }, { "label": "Cleaning Supplies", "value": 0.01971090670170828 }, { "label": "Baby Food", "value": 0.01971090670170828 }, { "label": "Snacks", "value": 0.11038107752956636 }, { "label": "Deli", "value": 0.04993429697766097 }]
+
+      } else if (city === "Chicago") {
+        info = ["Chicago", "4659", "$37050.49"]
+        data = [{ "label": "Frozen", "value": 0.09851899549259498 }, { "label": "Health", "value": 0.002361021678471775 }, { "label": "Grains", "value": 0.0437862202189311 }, { "label": "Fruits & Veggies", "value": 0.0008585533376261 }, { "label": "Alcohol", "value": 0.0038634900193174502 }, { "label": "Foreign", "value": 0.007512341704228375 }, { "label": "Beverages", "value": 0.08950418544752092 }, { "label": "Pet Food", "value": 0.004936681691350075 }, { "label": "Pasta & Rice", "value": 0.0300493668169135 }, { "label": "Toiletries", "value": 0.016097875080489377 }, { "label": "Meats", "value": 0.0197467267654003 }, { "label": "Condiments", "value": 0.07190384202618588 }, { "label": "Breakfast", "value": 0.024683408456750374 }, { "label": "Canned Foods", "value": 0.046576518566215926 }, { "label": "Dairy", "value": 0.20798454603992272 }, { "label": "Cleaning Supplies", "value": 0.02189311010946555 }, { "label": "Baby Food", "value": 0.023395578450311226 }, { "label": "Snacks", "value": 0.11182657222579953 }, { "label": "Deli", "value": 0.051513200257566 }]
+
+      }
+
+      change(data, info);
+
+    }
+
+    function change(data, info) {
+      /* ------- PIE SLICES -------*/
+      var slice = pie_svg.select(".slices").selectAll("path.slice")
+        .data(pie(data), key);
+
+      slice.enter()
+        .insert("path")
+        .style("fill", function (d) { return color_pie(d.data.label); })
+        .attr("class", "slice");
+
+      slice
+        .on("mouseover", function (d) {
+          var dept = d['data']['label'];
+          if (info[0] == 'New York City')
+            city = NewYork;
+          else {
+            city = info[0].split(' ').join('')
+          }
+          getDeptInfo(info[0], dept);
+        })
+        .transition().duration(1000)
+        .attrTween("d", function (d) {
+          this._current = this._current || d;
+          var interpolate = d3.interpolate(this._current, d);
+          this._current = interpolate(0);
+          return function (t) {
+          };
+        })
+
+      slice.exit()
+        .remove();
+
+      var title = pie_svg.select(".city_name")
+        .text(info[0]);
+      var trans = pie_svg.select(".total_trans")
+        .text('Total Transactions: ' + info[1])
+      var trans = pie_svg.select(".total_rev")
+        .text('Total Revenue: ' + info[2])
+      /* ------- TEXT LABELS -------*/
+
+      var text = pie_svg.select(".labels").selectAll("text")
+        .data(pie(data), key);
+
+      text.enter()
+        .append("text")
+        .attr("dy", ".35em")
+        .text(function (d) {
+          return d.data.label;
+        });
+
+      function midAngle(d) {
+        return d.startAngle + (d.endAngle - d.startAngle) / 2;
+      }
+
+      text.transition().duration(1000)
+        .attrTween("transform", function (d) {
+          this._current = this._current || d;
+          var interpolate = d3.interpolate(this._current, d);
+          this._current = interpolate(0);
+          return function (t) {
+            var d2 = interpolate(t);
+            var pos = outerArc.centroid(d2);
+            pos[0] = radius * (midAngle(d2) < Math.PI ? 1 : -1);
+            return "translate(" + pos + ")";
+          };
+        })
+        .styleTween("text-anchor", function (d) {
+          this._current = this._current || d;
+          var interpolate = d3.interpolate(this._current, d);
+          this._current = interpolate(0);
+          return function (t) {
+            var d2 = interpolate(t);
+            return midAngle(d2) < Math.PI ? "start" : "end";
+          };
+        });
+
+      text.exit()
+        .remove();
+
+      /* ------- SLICE TO TEXT POLYLINES -------*/
+
+      var polyline = pie_svg.select(".lines").selectAll("polyline")
+        .data(pie(data), key);
+
+      polyline.enter()
+        .append("polyline");
+
+      polyline.transition().duration(1000)
+        .attrTween("points", function (d) {
+          this._current = this._current || d;
+          var interpolate = d3.interpolate(this._current, d);
+          this._current = interpolate(0);
+          return function (t) {
+            var d2 = interpolate(t);
+            var pos = outerArc.centroid(d2);
+            pos[0] = radius * 0.95 * (midAngle(d2) < Math.PI ? 1 : -1);
+            return [arc.centroid(d2), outerArc.centroid(d2), pos];
+          };
+        });
+
+      polyline.exit()
+        .remove();
+    };
+
+
+
+
+  </script>

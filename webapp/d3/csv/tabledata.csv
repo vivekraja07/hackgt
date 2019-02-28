@@ -1,6 +1,0 @@
-Route,Mode of Transportation,Mileage,National Freight Rate,Estimated Freight
-Topeka -> Denver -> Pheonix -> San Diego -> Los Angeles -> San Jose -> San Francisco,Truck,2268 miles,$2.18/mile,"97,324 lbs"
-Topeka -> Chicago -> New York -> Philadelphia -> Birmingham -> Houston -> Dallas,Truck,3251 miles,$2.18/mile,"390,877 lbs"
-Chicago -> Indiannapolis,Flight,183 miles,$16.12/mile,"25,000 lbs"
-Chicago -> Fargo,Flight,643 miles,$16.12/mile,"6,000 lbs"
-Birmingham -> Jacksonville,Flight,491 miles,$16.12/mile,"14,000 lbs"
