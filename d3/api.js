@@ -111,3 +111,13 @@ function getDeptInfo(city,dept) {
   makeCORSRequestDept("http://localhost:5000/city/"+city+"/dept/"+dept);
 }
 
+function getCity(city,city_name) {
+    console.log(city)
+    makeCORSRequest("http://localhost:5000/city/" + city,city_name);
+}
+
+function getTotal(city) {
+    makeCORSRequest("http://localhost:5000/totals","All Orders");
+}
+
+
